@@ -1,0 +1,269 @@
+import ObjectiveC
+import UIKit
+
+@MainActor
+protocol KeyboardFreezeRuntimeProviding {
+  func capture() -> KeyboardFreezeRuntime.Capture?
+  func keyboardWindows(on screen: UIScreen) -> [UIWindow]
+  func pauseSnapshot(_ snapshotView: UIView)
+}
+
+@MainActor
+struct LiveKeyboardFreezeRuntime: KeyboardFreezeRuntimeProviding {
+  func capture() -> KeyboardFreezeRuntime.Capture? {
+    KeyboardFreezeRuntime.capture()
+  }
+
+  func keyboardWindows(on screen: UIScreen) -> [UIWindow] {
+    KeyboardFreezeRuntime.keyboardWindows(on: screen)
+  }
+
+  func pauseSnapshot(_ snapshotView: UIView) {
+    KeyboardFreezeRuntime.pauseSnapshot(snapshotView)
+  }
+}
+
+/// Runtime lookup for the live keyboard surface and a frozen snapshot of it.
+///
+/// Private symbol names are assembled at runtime and every lookup fails closed.
+@MainActor
+enum KeyboardFreezeRuntime {
+  @MainActor
+  struct Capture {
+    let keyboardWindow: UIWindow
+    let keyboardHostView: UIView
+    let snapshotView: UIView
+
+    var keyboardFrameInScreen: CGRect {
+      keyboardHostView.convert(keyboardHostView.bounds, to: nil)
+    }
+
+    var keyboardFrameInWindow: CGRect {
+      keyboardHostView.convert(keyboardHostView.bounds, to: keyboardWindow)
+    }
+  }
+
+  static func capture() -> Capture? {
+    guard let keyboardWindow = activeKeyboardWindow,
+      !keyboardWindow.isHidden,
+      keyboardWindow.alpha > 0
+    else { return nil }
+
+    guard let keyboardHostView = keyboardHostView(in: keyboardWindow),
+      keyboardHostView.bounds.height > 1
+    else { return nil }
+
+    let keyboardFrameInScreen = keyboardHostView.convert(
+      keyboardHostView.bounds,
+      to: nil
+    )
+    let visibleKeyboardFrame = keyboardFrameInScreen.intersection(
+      keyboardWindow.screen.bounds
+    )
+    guard visibleKeyboardFrame.width > 1, visibleKeyboardFrame.height > 1 else {
+      return nil
+    }
+    guard let snapshotView = keyboardSnapshotView(for: keyboardHostView) else {
+      return nil
+    }
+
+    return Capture(
+      keyboardWindow: keyboardWindow,
+      keyboardHostView: keyboardHostView,
+      snapshotView: snapshotView
+    )
+  }
+
+  static var activeKeyboardWindow: UIWindow? {
+    let activeScenes = UIApplication.shared.connectedScenes
+      .compactMap { $0 as? UIWindowScene }
+      .filter { $0.activationState == .foregroundActive }
+
+    for scene in activeScenes {
+      if let remoteKeyboardWindow = remoteKeyboardWindow(for: scene.screen) {
+        return remoteKeyboardWindow
+      }
+    }
+
+    guard let textEffectsWindowClass = NSClassFromString(textEffectsWindowClassName) else {
+      return nil
+    }
+
+    return
+      activeScenes
+      .flatMap(\.windows)
+      .reversed()
+      .first { window in
+        window.isKind(of: textEffectsWindowClass)
+          && !window.isHidden
+          && window.alpha > 0
+      }
+  }
+
+  static func keyboardWindows(on screen: UIScreen) -> [UIWindow] {
+    var windows: [UIWindow] = []
+    if let remoteKeyboardWindow = remoteKeyboardWindow(for: screen) {
+      windows.append(remoteKeyboardWindow)
+    }
+
+    let keyboardWindowClasses = [
+      NSClassFromString(remoteKeyboardWindowClassName),
+      NSClassFromString(textEffectsWindowClassName),
+    ].compactMap { $0 }
+    let sceneWindows = UIApplication.shared.connectedScenes
+      .compactMap { $0 as? UIWindowScene }
+      .filter { $0.screen === screen }
+      .flatMap(\.windows)
+
+    for window in sceneWindows
+    where keyboardWindowClasses.contains(where: { window.isKind(of: $0) }) {
+      if !windows.contains(where: { $0 === window }) {
+        windows.append(window)
+      }
+    }
+    return windows
+  }
+
+  static func keyboardHostView(in window: UIView) -> UIView? {
+    firstDescendant(of: window, named: inputSetHostViewClassName)
+  }
+
+  static func keyboardSnapshotView(for keyboardView: UIView) -> UIView? {
+    guard let snapshotterClass = NSClassFromString(snapshotterClassName) else {
+      return nil
+    }
+
+    let factorySelector = NSSelectorFromString(snapshotterFactorySelectorName)
+    typealias SnapshotterFactory =
+      @convention(c) (
+        AnyClass,
+        Selector,
+        UIView,
+        Bool
+      ) -> Unmanaged<AnyObject>?
+    guard
+      let factory = classMethod(
+        factorySelector,
+        on: snapshotterClass,
+        signature: SnapshotterFactory.self
+      ),
+      let snapshotter = factory(
+        snapshotterClass,
+        factorySelector,
+        keyboardView,
+        false
+      )?.takeUnretainedValue()
+    else { return nil }
+
+    let snapshotSelector = NSSelectorFromString(snapshotViewSelectorName)
+    guard let snapshotterType = object_getClass(snapshotter) else { return nil }
+    typealias SnapshotViewGetter =
+      @convention(c) (
+        AnyObject,
+        Selector
+      ) -> Unmanaged<AnyObject>?
+    guard
+      let snapshotViewGetter = instanceMethod(
+        snapshotSelector,
+        on: snapshotterType,
+        signature: SnapshotViewGetter.self
+      )
+    else { return nil }
+
+    return snapshotViewGetter(snapshotter, snapshotSelector)?
+      .takeUnretainedValue() as? UIView
+  }
+
+  static func pauseSnapshot(_ snapshotView: UIView) {
+    let pausedTime = snapshotView.layer.convertTime(CACurrentMediaTime(), from: nil)
+    snapshotView.layer.speed = 0
+    snapshotView.layer.timeOffset = pausedTime
+  }
+
+  static var remoteKeyboardWindowClassName: String {
+    assembled(["Window", "Keyboard", "Remote", "UI"])
+  }
+
+  static var remoteKeyboardWindowSelectorName: String {
+    assembled(["create:", "Screen:", "For", "Window", "Keyboard", "remote"])
+  }
+
+  static var inputSetHostViewClassName: String {
+    assembled(["View", "Host", "Set", "Input", "UI"])
+  }
+
+  static var textEffectsWindowClassName: String {
+    assembled(["Window", "Effects", "Text", "UI"])
+  }
+
+  static var snapshotterClassName: String {
+    assembled(["Snapshotter", "Tree", "View", "KB", "UI"])
+  }
+
+  static var snapshotterFactorySelectorName: String {
+    assembled(["Updates:", "Screen", "after", "View:", "Keyboard", "For", "snapshotter"])
+  }
+
+  static var snapshotViewSelectorName: String {
+    assembled(["View", "snapshot"])
+  }
+
+  static func assembled(_ components: [String]) -> String {
+    components.reversed().joined()
+  }
+
+  private static func remoteKeyboardWindow(for screen: UIScreen) -> UIWindow? {
+    guard
+      let remoteKeyboardWindowClass = NSClassFromString(
+        remoteKeyboardWindowClassName
+      )
+    else { return nil }
+
+    let selector = NSSelectorFromString(remoteKeyboardWindowSelectorName)
+    typealias RemoteKeyboardWindowFactory =
+      @convention(c) (
+        AnyClass,
+        Selector,
+        UIScreen,
+        Bool
+      ) -> Unmanaged<AnyObject>?
+    guard
+      let factory = classMethod(
+        selector,
+        on: remoteKeyboardWindowClass,
+        signature: RemoteKeyboardWindowFactory.self
+      )
+    else { return nil }
+
+    return factory(remoteKeyboardWindowClass, selector, screen, false)?
+      .takeUnretainedValue() as? UIWindow
+  }
+
+  private static func firstDescendant(
+    of view: UIView,
+    named className: String
+  ) -> UIView? {
+    if NSStringFromClass(type(of: view)) == className { return view }
+    return view.subviews.lazy.compactMap {
+      firstDescendant(of: $0, named: className)
+    }.first
+  }
+
+  private static func classMethod<Signature>(
+    _ selector: Selector,
+    on cls: AnyClass,
+    signature: Signature.Type
+  ) -> Signature? {
+    guard let method = class_getClassMethod(cls, selector) else { return nil }
+    return unsafeBitCast(method_getImplementation(method), to: Signature.self)
+  }
+
+  private static func instanceMethod<Signature>(
+    _ selector: Selector,
+    on cls: AnyClass,
+    signature: Signature.Type
+  ) -> Signature? {
+    guard let method = class_getInstanceMethod(cls, selector) else { return nil }
+    return unsafeBitCast(method_getImplementation(method), to: Signature.self)
+  }
+}
