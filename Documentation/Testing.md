@@ -8,6 +8,13 @@ physical iPhone.
 - Focus the text field and open the menu.
 - Confirm the cursor remains focused and blinking.
 - Confirm the menu is leading-aligned and vertically centered on its source.
+- Confirm the source remains centered while it blurs and fades away.
+- Confirm expanded content scales from its center without relayout or blur.
+- On dismissal, confirm the source glass appears in place without morphing from
+  a neighboring glass element.
+- Drag left, right, and up; confirm resistance keeps the menu near its anchor
+  and release springs it back.
+- Drag the menu down and confirm it morphs back into the source button.
 - Tap inside the menu.
 - Tap app content and several places on the frozen keyboard.
 - Dismiss and reopen repeatedly.

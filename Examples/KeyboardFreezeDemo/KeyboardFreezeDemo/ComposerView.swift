@@ -3,27 +3,27 @@ import SwiftUI
 
 struct ComposerView: View {
   @Binding var text: String
+  @Binding var isMenuPresented: Bool
   let inputIsFocused: FocusState<Bool>.Binding
-  let menuSource: KeyboardFreezeSource
-  let isMenuPresented: Bool
   let openMenu: () -> Void
 
   var body: some View {
     GlassEffectContainer(spacing: 12) {
       HStack(spacing: 12) {
-        if isMenuPresented {
-          Color.clear
-            .frame(width: 48, height: 48)
-        } else {
-          Button("Open menu", systemImage: "plus", action: openMenu)
-            .labelStyle(.iconOnly)
-            .font(.title3)
-            .frame(width: 48, height: 48)
-            .contentShape(.circle)
-            .buttonStyle(.plain)
-            .glassEffect(.regular.interactive(), in: .circle)
-            .keyboardFreezeSource(menuSource)
-        }
+        Button("Open menu", systemImage: "plus", action: openMenu)
+          .labelStyle(.iconOnly)
+          .font(.title3)
+          .frame(width: 48, height: 48)
+          .contentShape(.circle)
+          .buttonStyle(.plain)
+          .keyboardPopover(
+            isPresented: $isMenuPresented,
+            attachmentAnchor: .leading
+          ) {
+            Text("Hello World")
+              .font(.headline)
+              .frame(width: 250, height: 250)
+          }
 
         TextField("Text", text: $text, axis: .vertical)
           .focused(inputIsFocused)
@@ -42,9 +42,8 @@ struct ComposerView: View {
 
   ComposerView(
     text: $text,
+    isMenuPresented: .constant(false),
     inputIsFocused: $inputIsFocused,
-    menuSource: KeyboardFreezeSource(),
-    isMenuPresented: false,
     openMenu: {}
   )
   .padding()

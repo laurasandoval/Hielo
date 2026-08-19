@@ -26,8 +26,8 @@ at your own risk. Preserve the fail-closed behavior when any symbol is missing.
 - `Examples/KeyboardFreezeDemo`: the iOS demonstration app
 - `Documentation`: architecture and physical-device verification
 
-Use one Swift type per file. Prefer SwiftUI in the example app; keep any UIKit
-there limited to narrow system-presentation wrappers.
+Use one Swift type per file. Prefer SwiftUI in the example app; UIKit is
+expected only inside the package's keyboard-window boundary.
 
 ## Verification
 

@@ -24,6 +24,7 @@ private struct KeyboardFreezeModifier: ViewModifier {
 
   func body(content: Content) -> some View {
     content
+      .environment(\.keyboardFreezeSession, keyboardFreeze)
       .overlay {
         if keyboardFreeze.isPresentingOverlay {
           Button("Dismiss keyboard overlay", action: handleOutsideOverlayTap)

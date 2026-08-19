@@ -14,13 +14,28 @@ idle
 
 The runtime captures and pauses the visible keyboard snapshot. A full-window
 presentation view is inserted into the system keyboard window with that
-snapshot. SwiftUI overlay content is hosted in a transparent application-scene
-window one level above the keyboard, allowing system presentations such as
-popovers to cover the frozen keys. Matching interaction shields block both the
-app and keyboard windows while the presentation is active.
+snapshot and the SwiftUI overlay content above it. A matching interaction
+shield blocks the app window while the presentation is active.
 
 The input remains focused, so the app retains its cursor and keyboard-driven
 layout.
+
+`KeyboardPopover` builds on this boundary. Its source view measures itself and
+the expanded content with ordinary SwiftUI layout, then aligns matching
+`UnitPoint` anchors. One normalized expansion value drives surface size,
+corner radius, source blur and opacity, and the expanded content's center-based
+visual scale. Both content layers remain centered in the changing surface. The
+expanded content keeps its final layout throughout the transition and is
+clipped by the changing glass surface.
+
+The app-side source uses an identity glass transition. The custom overlay
+finishes its collapse before the source is restored, so a surrounding
+`GlassEffectContainer` cannot match the returning source against a sibling
+glass element.
+
+Popover dragging is rubber-banded in every direction. A non-dismissed release
+animates back to its anchor; dismissal is intentionally limited to a downward
+release.
 
 ## Pinned presentation
 

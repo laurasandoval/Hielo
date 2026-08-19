@@ -5,12 +5,10 @@ import UIKit
 
 struct OverlayDemoView: View {
   @State private var keyboardFreeze = KeyboardFreeze()
-  @State private var menuSource = KeyboardFreezeSource()
   @State private var text = ""
   @State private var isMenuPresented = false
   @State private var isWaitingForKeyboard = false
   @State private var keyboardIsVisible = false
-  @State private var showsUnavailableAlert = false
   @FocusState private var inputIsFocused: Bool
 
   var body: some View {
@@ -24,14 +22,16 @@ struct OverlayDemoView: View {
 
         ComposerView(
           text: $text,
+          isMenuPresented: $isMenuPresented,
           inputIsFocused: $inputIsFocused,
-          menuSource: menuSource,
-          isMenuPresented: isMenuPresented,
           openMenu: requestMenu
         )
         .padding(.horizontal, composerSpacing)
         .padding(.bottom, composerSpacing)
-        .animation(.smooth, value: inputIsFocused)
+        .animation(
+          .smooth(duration: 0.2),
+          value: inputIsFocused
+        )
       }
     }
     .ignoresSafeArea(.container, edges: .bottom)
@@ -48,12 +48,6 @@ struct OverlayDemoView: View {
       ),
       perform: handleKeyboardDidHide
     )
-    .onChange(of: isMenuPresented, handleMenuPresentationChange)
-    .alert("Keyboard unavailable", isPresented: $showsUnavailableAlert) {
-      Button("OK", role: .cancel) {}
-    } message: {
-      Text("Try again with the software keyboard visible.")
-    }
   }
 
   private var composerSpacing: CGFloat {
@@ -81,38 +75,7 @@ struct OverlayDemoView: View {
   }
 
   private func presentMenu() {
-    guard let sourceFrame = menuSource.frameInScreen else {
-      showsUnavailableAlert = true
-      return
-    }
-    let result = keyboardFreeze.presentOverlay(
-      from: menuSource,
-      overlayFrame: { $0.sourceFrame },
-      onOutsideTap: { isMenuPresented = false },
-      content: { _ in
-        KeyboardPopoverPresenter(
-          isPresented: $isMenuPresented,
-          sourceFrame: sourceFrame
-        )
-      }
-    )
-
-    if result.succeeded {
-      Task { @MainActor in
-        await Task.yield()
-        isMenuPresented = true
-      }
-    } else {
-      showsUnavailableAlert = true
-    }
-  }
-
-  private func handleMenuPresentationChange(
-    _: Bool,
-    _ isPresented: Bool
-  ) {
-    guard !isPresented else { return }
-    keyboardFreeze.dismissOverlay(after: .milliseconds(400))
+    isMenuPresented = true
   }
 }
 

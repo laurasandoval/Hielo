@@ -2,7 +2,7 @@
 
 Freeze the visible iOS system keyboard and place custom SwiftUI content over it.
 
-KeyboardFreeze is designed for interactions such as popover menus that open
+KeyboardFreeze is designed for interactions such as glass menus that open
 over the keyboard without dismissing it.
 
 > KeyboardFreeze uses three private UIKit mechanisms—remote keyboard-window
@@ -23,10 +23,11 @@ In Xcode, choose **File → Add Package Dependencies** and enter:
 https://github.com/laurasandoval/KeyboardFreeze
 ```
 
-## Present content over a frozen keyboard
+## Present a keyboard popover
 
 Create one session for the screen and install its host modifier on the full
-page:
+page. Apply `keyboardPopover` to any source view and size the expanded content
+with normal SwiftUI layout modifiers:
 
 ```swift
 import KeyboardFreeze
@@ -34,7 +35,7 @@ import SwiftUI
 
 struct ChatView: View {
   @State private var keyboardFreeze = KeyboardFreeze()
-  @State private var source = KeyboardFreezeSource()
+  @State private var isMenuPresented = false
   @FocusState private var inputIsFocused: Bool
 
   var body: some View {
@@ -42,7 +43,14 @@ struct ChatView: View {
       Spacer()
 
       Button("Open menu", systemImage: "plus", action: openMenu)
-        .keyboardFreezeSource(source)
+        .frame(width: 48, height: 48)
+        .keyboardPopover(
+          isPresented: $isMenuPresented,
+          attachmentAnchor: .leading
+        ) {
+          Text("Hello World")
+            .frame(width: 250, height: 250)
+        }
 
       TextField("Message", text: .constant(""))
         .focused($inputIsFocused)
@@ -51,22 +59,30 @@ struct ChatView: View {
   }
 
   private func openMenu() {
-    keyboardFreeze.presentOverlay(from: source) { _ in
-      Text("Hello World")
-        .padding()
-    }
+    isMenuPresented = true
   }
 }
 ```
 
-The real text input stays focused. Taps outside the custom content dismiss it
-by default, or can be handled with `onOutsideTap`.
+The modifier supplies the Liquid Glass surface. Both the source and expanded
+content can contain any SwiftUI view. Expanded content can hug its content or
+set a fixed size with `frame`; no package-specific sizing style is required.
+
+`.leading` means leading-center. Standard `UnitPoint` values such as `.top`,
+`.bottomTrailing`, and `.center`, as well as custom unit points, are also
+supported. The real text input stays focused. Taps outside dismiss the popover,
+and the expanded surface can be dragged in any direction. Only a downward
+release dismisses it.
+
+For fully custom presentations, `presentOverlay` and `KeyboardFreezeSource`
+remain available as lower-level APIs.
 
 ## Failure handling
 
-Presentation methods return `KeyboardFreezeActivationResult`. A missing or
-changed private runtime returns `.keyboardUnavailable` and leaves the live
-keyboard alone.
+Low-level presentation methods return `KeyboardFreezeActivationResult`. A
+missing or changed private runtime returns `.keyboardUnavailable` and leaves
+the live keyboard alone. `keyboardPopover` fails closed by resetting its
+presentation binding to `false`.
 
 Use one `KeyboardFreeze` instance per screen or flow. Call `cancel()` when a
 manually managed session is no longer needed; the default host lifecycle
@@ -75,7 +91,7 @@ cancels automatically when its view disappears.
 ## Example app
 
 Open `Examples/KeyboardFreezeDemo/KeyboardFreezeDemo.xcodeproj` to run the
-minimal morphing-popover example. Keyboard snapshot behavior must also be
+minimal morphing glass-menu example. Keyboard snapshot behavior must also be
 verified on a physical iPhone because Simulator keyboard windows can differ.
 
 ## License

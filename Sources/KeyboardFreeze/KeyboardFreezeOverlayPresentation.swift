@@ -3,10 +3,8 @@ import SwiftUI
 @MainActor
 final class KeyboardFreezeOverlayPresentation: NSObject, UIGestureRecognizerDelegate {
   private let onOutsideTap: @MainActor () -> Void
-  private let overlayFrame: CGRect
   private let presentationView: KeyboardFreezePresentationView
   private let hostingController: UIHostingController<AnyView>
-  private var overlayWindow: KeyboardFreezeOverlayWindow?
 
   init(
     keyboardWindow: UIWindow,
@@ -16,43 +14,9 @@ final class KeyboardFreezeOverlayPresentation: NSObject, UIGestureRecognizerDele
     onOutsideTap: @escaping @MainActor () -> Void,
     content: AnyView
   ) {
-    let applicationKeyWindow = Self.applicationKeyWindow(
-      on: keyboardWindow.screen
-    )
-    let presentedOverlayFrame: CGRect
-    if let applicationKeyWindow {
-      let frameInScreen = keyboardWindow.convert(overlayFrame, to: nil)
-      presentedOverlayFrame = applicationKeyWindow.convert(
-        frameInScreen,
-        from: nil
-      )
-    } else {
-      presentedOverlayFrame = overlayFrame
-    }
-
     self.onOutsideTap = onOutsideTap
-    self.overlayFrame = presentedOverlayFrame
     presentationView = KeyboardFreezePresentationView(onDismiss: onOutsideTap)
-    hostingController = UIHostingController(
-      rootView: AnyView(
-        ZStack(alignment: .topLeading) {
-          content
-            .frame(
-              width: presentedOverlayFrame.width,
-              height: presentedOverlayFrame.height
-            )
-            .offset(
-              x: presentedOverlayFrame.minX,
-              y: presentedOverlayFrame.minY
-            )
-        }
-        .frame(
-          width: keyboardWindow.bounds.width,
-          height: keyboardWindow.bounds.height,
-          alignment: .topLeading
-        )
-      )
-    )
+    hostingController = UIHostingController(rootView: content)
     super.init()
 
     presentationView.backgroundColor = .clear
@@ -66,31 +30,14 @@ final class KeyboardFreezeOverlayPresentation: NSObject, UIGestureRecognizerDele
     presentationView.addSubview(keyboardSnapshotView)
 
     hostingController.view.backgroundColor = .clear
-    if let windowScene = applicationKeyWindow?.windowScene {
-      let overlayWindow = KeyboardFreezeOverlayWindow(windowScene: windowScene)
-      overlayWindow.backgroundColor = .clear
-      overlayWindow.windowLevel = keyboardWindow.windowLevel + 1
-      overlayWindow.rootViewController = hostingController
+    hostingController.view.frame = overlayFrame
+    presentationView.addSubview(hostingController.view)
 
-      self.overlayWindow = overlayWindow
-      overlayWindow.isHidden = false
-    } else {
-      hostingController.view.frame = keyboardWindow.bounds
-      presentationView.addSubview(hostingController.view)
-    }
-
-    hostingController.view.addGestureRecognizer(makeOutsideTapRecognizer())
-    if overlayWindow != nil {
-      presentationView.addGestureRecognizer(makeOutsideTapRecognizer())
-    }
+    presentationView.addGestureRecognizer(makeOutsideTapRecognizer())
     keyboardWindow.addSubview(presentationView)
   }
 
   func tearDown() {
-    hostingController.view.removeFromSuperview()
-    overlayWindow?.isHidden = true
-    overlayWindow?.rootViewController = nil
-    overlayWindow = nil
     presentationView.removeFromSuperview()
   }
 
@@ -103,7 +50,7 @@ final class KeyboardFreezeOverlayPresentation: NSObject, UIGestureRecognizerDele
     shouldReceive touch: UITouch
   ) -> Bool {
     let location = touch.location(in: hostingController.view)
-    return !overlayFrame.contains(location)
+    return !hostingController.view.point(inside: location, with: nil)
   }
 
   @objc private func handleOutsideTap(_: UITapGestureRecognizer) {
@@ -120,15 +67,4 @@ final class KeyboardFreezeOverlayPresentation: NSObject, UIGestureRecognizerDele
     return recognizer
   }
 
-  private static func applicationKeyWindow(on screen: UIScreen) -> UIWindow? {
-    UIApplication.shared.connectedScenes
-      .compactMap { $0 as? UIWindowScene }
-      .filter {
-        $0.activationState == .foregroundActive
-          && $0.session.role == .windowApplication
-          && $0.screen === screen
-      }
-      .flatMap(\.windows)
-      .first(where: \.isKeyWindow)
-  }
 }
