@@ -8,29 +8,23 @@
 
 /* Begin PBXBuildFile section */
 		A10000000000000000000001 /* KeyboardFreezeDemoApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000001 /* KeyboardFreezeDemoApp.swift */; };
-		A10000000000000000000002 /* DemoListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000002 /* DemoListView.swift */; };
-		A10000000000000000000003 /* ConversationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000003 /* ConversationView.swift */; };
-		A10000000000000000000004 /* ChatComposer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000004 /* ChatComposer.swift */; };
-		A10000000000000000000005 /* AttachmentOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000005 /* AttachmentOverlay.swift */; };
+		A10000000000000000000002 /* KeyboardPopoverPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000002 /* KeyboardPopoverPresenter.swift */; };
+		A10000000000000000000003 /* PopoverPositioner.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000003 /* PopoverPositioner.swift */; };
+		A10000000000000000000007 /* PopoverPositioningView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000007 /* PopoverPositioningView.swift */; };
+		A10000000000000000000004 /* ComposerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000004 /* ComposerView.swift */; };
+		A10000000000000000000005 /* KeyboardMenuContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000005 /* KeyboardMenuContent.swift */; };
 		A10000000000000000000006 /* OverlayDemoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000006 /* OverlayDemoView.swift */; };
-		A10000000000000000000007 /* SidebarPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000007 /* SidebarPanel.swift */; };
-		A10000000000000000000008 /* SidebarComposer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000008 /* SidebarComposer.swift */; };
-		A10000000000000000000009 /* SidebarChatPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000009 /* SidebarChatPage.swift */; };
-		A1000000000000000000000A /* SidebarDemoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000000A /* SidebarDemoView.swift */; };
 		A1000000000000000000000B /* KeyboardFreeze in Frameworks */ = {isa = PBXBuildFile; productRef = AA0000000000000000000002 /* KeyboardFreeze */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		A20000000000000000000001 /* KeyboardFreezeDemoApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardFreezeDemoApp.swift; sourceTree = "<group>"; };
-		A20000000000000000000002 /* DemoListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoListView.swift; sourceTree = "<group>"; };
-		A20000000000000000000003 /* ConversationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationView.swift; sourceTree = "<group>"; };
-		A20000000000000000000004 /* ChatComposer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatComposer.swift; sourceTree = "<group>"; };
-		A20000000000000000000005 /* AttachmentOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttachmentOverlay.swift; sourceTree = "<group>"; };
+		A20000000000000000000002 /* KeyboardPopoverPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardPopoverPresenter.swift; sourceTree = "<group>"; };
+		A20000000000000000000003 /* PopoverPositioner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopoverPositioner.swift; sourceTree = "<group>"; };
+		A20000000000000000000007 /* PopoverPositioningView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopoverPositioningView.swift; sourceTree = "<group>"; };
+		A20000000000000000000004 /* ComposerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComposerView.swift; sourceTree = "<group>"; };
+		A20000000000000000000005 /* KeyboardMenuContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardMenuContent.swift; sourceTree = "<group>"; };
 		A20000000000000000000006 /* OverlayDemoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverlayDemoView.swift; sourceTree = "<group>"; };
-		A20000000000000000000007 /* SidebarPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SidebarPanel.swift; sourceTree = "<group>"; };
-		A20000000000000000000008 /* SidebarComposer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SidebarComposer.swift; sourceTree = "<group>"; };
-		A20000000000000000000009 /* SidebarChatPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SidebarChatPage.swift; sourceTree = "<group>"; };
-		A2000000000000000000000A /* SidebarDemoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SidebarDemoView.swift; sourceTree = "<group>"; };
 		A2000000000000000000000B /* KeyboardFreezeDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = KeyboardFreezeDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -58,15 +52,12 @@
 			isa = PBXGroup;
 			children = (
 				A20000000000000000000001 /* KeyboardFreezeDemoApp.swift */,
-				A20000000000000000000002 /* DemoListView.swift */,
-				A20000000000000000000003 /* ConversationView.swift */,
-				A20000000000000000000004 /* ChatComposer.swift */,
-				A20000000000000000000005 /* AttachmentOverlay.swift */,
+				A20000000000000000000002 /* KeyboardPopoverPresenter.swift */,
+				A20000000000000000000003 /* PopoverPositioner.swift */,
+				A20000000000000000000007 /* PopoverPositioningView.swift */,
+				A20000000000000000000004 /* ComposerView.swift */,
+				A20000000000000000000005 /* KeyboardMenuContent.swift */,
 				A20000000000000000000006 /* OverlayDemoView.swift */,
-				A20000000000000000000007 /* SidebarPanel.swift */,
-				A20000000000000000000008 /* SidebarComposer.swift */,
-				A20000000000000000000009 /* SidebarChatPage.swift */,
-				A2000000000000000000000A /* SidebarDemoView.swift */,
 			);
 			path = KeyboardFreezeDemo;
 			sourceTree = "<group>";
@@ -154,15 +145,12 @@
 			buildActionMask = 2147483647;
 			files = (
 				A10000000000000000000001 /* KeyboardFreezeDemoApp.swift in Sources */,
-				A10000000000000000000002 /* DemoListView.swift in Sources */,
-				A10000000000000000000003 /* ConversationView.swift in Sources */,
-				A10000000000000000000004 /* ChatComposer.swift in Sources */,
-				A10000000000000000000005 /* AttachmentOverlay.swift in Sources */,
+				A10000000000000000000002 /* KeyboardPopoverPresenter.swift in Sources */,
+				A10000000000000000000003 /* PopoverPositioner.swift in Sources */,
+				A10000000000000000000007 /* PopoverPositioningView.swift in Sources */,
+				A10000000000000000000004 /* ComposerView.swift in Sources */,
+				A10000000000000000000005 /* KeyboardMenuContent.swift in Sources */,
 				A10000000000000000000006 /* OverlayDemoView.swift in Sources */,
-				A10000000000000000000007 /* SidebarPanel.swift in Sources */,
-				A10000000000000000000008 /* SidebarComposer.swift in Sources */,
-				A10000000000000000000009 /* SidebarChatPage.swift in Sources */,
-				A1000000000000000000000A /* SidebarDemoView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

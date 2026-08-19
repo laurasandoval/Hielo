@@ -5,31 +5,29 @@ import UIKit
 
 struct OverlayDemoView: View {
   @State private var keyboardFreeze = KeyboardFreeze()
-  @State private var attachmentSource = KeyboardFreezeSource()
-  @State private var message = ""
+  @State private var menuSource = KeyboardFreezeSource()
+  @State private var text = ""
+  @State private var isMenuPresented = false
   @State private var isWaitingForKeyboard = false
+  @State private var keyboardIsVisible = false
   @State private var showsUnavailableAlert = false
   @FocusState private var inputIsFocused: Bool
 
   var body: some View {
     ZStack {
-      LinearGradient(
-        colors: [.blue.opacity(0.08), .clear],
-        startPoint: .top,
-        endPoint: .bottom
-      )
-      .ignoresSafeArea()
-
-      ConversationView()
+      Rectangle()
+        .fill(.background)
+        .ignoresSafeArea()
 
       VStack {
         Spacer()
 
-        ChatComposer(
-          message: $message,
+        ComposerView(
+          text: $text,
           inputIsFocused: $inputIsFocused,
-          attachmentSource: attachmentSource,
-          openAttachments: requestAttachmentOverlay
+          menuSource: menuSource,
+          isMenuPresented: isMenuPresented,
+          openMenu: requestMenu
         )
         .padding(.horizontal, composerSpacing)
         .padding(.bottom, composerSpacing)
@@ -38,14 +36,19 @@ struct OverlayDemoView: View {
     }
     .ignoresSafeArea(.container, edges: .bottom)
     .keyboardFreeze(keyboardFreeze)
-    .navigationTitle("Overlay")
-    .navigationBarTitleDisplayMode(.inline)
     .onReceive(
       NotificationCenter.default.publisher(
         for: UIResponder.keyboardDidShowNotification
       ),
       perform: handleKeyboardDidShow
     )
+    .onReceive(
+      NotificationCenter.default.publisher(
+        for: UIResponder.keyboardDidHideNotification
+      ),
+      perform: handleKeyboardDidHide
+    )
+    .onChange(of: isMenuPresented, handleMenuPresentationChange)
     .alert("Keyboard unavailable", isPresented: $showsUnavailableAlert) {
       Button("OK", role: .cancel) {}
     } message: {
@@ -57,55 +60,62 @@ struct OverlayDemoView: View {
     inputIsFocused ? 12 : 28
   }
 
-  private func requestAttachmentOverlay() {
-    guard inputIsFocused else {
+  private func requestMenu() {
+    guard keyboardIsVisible else {
       isWaitingForKeyboard = true
       inputIsFocused = true
       return
     }
-    presentAttachmentOverlay()
+    presentMenu()
   }
 
   private func handleKeyboardDidShow(_: Notification) {
+    keyboardIsVisible = true
     guard isWaitingForKeyboard else { return }
     isWaitingForKeyboard = false
-    presentAttachmentOverlay()
+    presentMenu()
   }
 
-  private func presentAttachmentOverlay() {
-    let result = keyboardFreeze.presentOverlay(
-      from: attachmentSource,
-      overlayFrame: attachmentOverlayFrame
-    ) { _ in
-      AttachmentOverlay(dismiss: dismissAttachmentOverlay)
-    }
+  private func handleKeyboardDidHide(_: Notification) {
+    keyboardIsVisible = false
+  }
 
-    if !result.succeeded {
+  private func presentMenu() {
+    guard let sourceFrame = menuSource.frameInScreen else {
+      showsUnavailableAlert = true
+      return
+    }
+    let result = keyboardFreeze.presentOverlay(
+      from: menuSource,
+      overlayFrame: { $0.sourceFrame },
+      onOutsideTap: { isMenuPresented = false },
+      content: { _ in
+        KeyboardPopoverPresenter(
+          isPresented: $isMenuPresented,
+          sourceFrame: sourceFrame
+        )
+      }
+    )
+
+    if result.succeeded {
+      Task { @MainActor in
+        await Task.yield()
+        isMenuPresented = true
+      }
+    } else {
       showsUnavailableAlert = true
     }
   }
 
-  private func attachmentOverlayFrame(
-    _ context: KeyboardFreeze.Context
-  ) -> CGRect {
-    let size = CGSize(width: 250, height: 250)
-    let minimumMargin: CGFloat = 12
-    let maximumX = context.windowBounds.maxX - size.width - minimumMargin
-    let x = min(max(context.sourceFrame.minX, minimumMargin), maximumX)
-    let y = max(
-      context.windowBounds.minY + minimumMargin,
-      context.keyboardFrame.minY - size.height - minimumMargin
-    )
-    return CGRect(origin: CGPoint(x: x, y: y), size: size)
-  }
-
-  private func dismissAttachmentOverlay() {
-    keyboardFreeze.dismissOverlay()
+  private func handleMenuPresentationChange(
+    _: Bool,
+    _ isPresented: Bool
+  ) {
+    guard !isPresented else { return }
+    keyboardFreeze.dismissOverlay(after: .milliseconds(400))
   }
 }
 
 #Preview {
-  NavigationStack {
-    OverlayDemoView()
-  }
+  OverlayDemoView()
 }

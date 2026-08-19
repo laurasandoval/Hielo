@@ -13,9 +13,11 @@ idle
 ## Overlay presentation
 
 The runtime captures and pauses the visible keyboard snapshot. A full-window
-presentation view is then inserted into the system keyboard window with the
-snapshot and a SwiftUI hosting controller. A matching SwiftUI interaction
-shield blocks the app window while the presentation is active.
+presentation view is inserted into the system keyboard window with that
+snapshot. SwiftUI overlay content is hosted in a transparent application-scene
+window one level above the keyboard, allowing system presentations such as
+popovers to cover the frozen keys. Matching interaction shields block both the
+app and keyboard windows while the presentation is active.
 
 The input remains focused, so the app retains its cursor and keyboard-driven
 layout.

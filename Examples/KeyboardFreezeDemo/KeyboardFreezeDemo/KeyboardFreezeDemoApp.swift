@@ -4,9 +4,7 @@ import SwiftUI
 struct KeyboardFreezeDemoApp: App {
   var body: some Scene {
     WindowGroup {
-      NavigationStack {
-        DemoListView()
-      }
+      OverlayDemoView()
     }
   }
 }

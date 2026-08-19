@@ -1,11 +1,9 @@
 # KeyboardFreeze
 
-Freeze the visible iOS system keyboard, place custom SwiftUI content over it,
-or pin it inside a moving page.
+Freeze the visible iOS system keyboard and place custom SwiftUI content over it.
 
-KeyboardFreeze is designed for interactions such as attachment menus that open
-without dismissing the keyboard and sidebars that carry the keyboard with the
-page while they move.
+KeyboardFreeze is designed for interactions such as popover menus that open
+over the keyboard without dismissing it.
 
 > KeyboardFreeze uses three private UIKit mechanisms—remote keyboard-window
 > lookup, input host-view lookup, and keyboard view snapshotting—lightly
@@ -43,7 +41,7 @@ struct ChatView: View {
     VStack {
       Spacer()
 
-      Button("Open attachments", systemImage: "plus", action: openAttachments)
+      Button("Open menu", systemImage: "plus", action: openMenu)
         .keyboardFreezeSource(source)
 
       TextField("Message", text: .constant(""))
@@ -52,9 +50,9 @@ struct ChatView: View {
     .keyboardFreeze(keyboardFreeze)
   }
 
-  private func openAttachments() {
+  private func openMenu() {
     keyboardFreeze.presentOverlay(from: source) { _ in
-      Text("Hello from above the keyboard")
+      Text("Hello World")
         .padding()
     }
   }
@@ -63,28 +61,6 @@ struct ChatView: View {
 
 The real text input stays focused. Taps outside the custom content dismiss it
 by default, or can be handled with `onOutsideTap`.
-
-## Pin the keyboard into a moving page
-
-Capture and pin the keyboard when page movement begins:
-
-```swift
-keyboardFreeze.pinKeyboard {
-  inputIsFocused = false
-}
-```
-
-After the page returns to the input, restore the real keyboard without its
-usual entrance animation:
-
-```swift
-keyboardFreeze.restoreKeyboard {
-  inputIsFocused = true
-}
-```
-
-Apply `.keyboardFreeze(keyboardFreeze)` to the entire moving page. The pinned
-snapshot is hosted by that modifier, so it follows the page's transforms.
 
 ## Failure handling
 
@@ -99,7 +75,7 @@ cancels automatically when its view disappears.
 ## Example app
 
 Open `Examples/KeyboardFreezeDemo/KeyboardFreezeDemo.xcodeproj` to run the
-overlay and moving-sidebar examples. Keyboard snapshot behavior must also be
+minimal morphing-popover example. Keyboard snapshot behavior must also be
 verified on a physical iPhone because Simulator keyboard windows can differ.
 
 ## License

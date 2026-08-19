@@ -5,21 +5,13 @@ physical iPhone.
 
 ## Overlay
 
-- Focus the message field and open the attachment panel.
+- Focus the text field and open the menu.
 - Confirm the cursor remains focused and blinking.
-- Tap inside the custom panel.
+- Confirm the menu is leading-aligned and vertically centered on its source.
+- Tap inside the menu.
 - Tap app content and several places on the frozen keyboard.
 - Dismiss and reopen repeatedly.
 - Repeat with the emoji keyboard, including during scroll momentum.
-
-## Moving sidebar
-
-- Begin dragging the page while the keyboard is visible.
-- Confirm the frozen keyboard is flush with the physical screen bottom.
-- Settle with the sidebar open, then return to chat.
-- Confirm the real keyboard does not visibly slide into place.
-- Reverse direction while restoration is active.
-- Repeat rapid direction changes.
 
 ## Additional conditions
 
