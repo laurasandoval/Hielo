@@ -7,6 +7,8 @@ struct KeyboardPopoverOverlay<SourceContent: View, PopoverContent: View>: View {
   let popoverContent: PopoverContent
   let sourceFrame: CGRect
   let destinationFrame: CGRect
+  let cornerRadii: KeyboardPopoverCornerRadii
+  let onSourceHandoff: @MainActor () -> Void
   let onDismissed: @MainActor () -> Void
 
   @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -96,12 +98,11 @@ struct KeyboardPopoverOverlay<SourceContent: View, PopoverContent: View>: View {
   }
 
   private var cornerRadius: Double {
-    let collapsedRadius = min(localSourceFrame.width, localSourceFrame.height) / 2
-    let expandedRadius = min(
-      32,
-      min(destinationFrame.width, destinationFrame.height) / 2
+    cornerRadii.resolve(
+      sourceSize: localSourceFrame.size,
+      destinationSize: destinationFrame.size,
+      expansionProgress: expansionProgress
     )
-    return interpolate(collapsedRadius, expandedRadius)
   }
 
   private var dragScale: Double {
@@ -156,16 +157,29 @@ struct KeyboardPopoverOverlay<SourceContent: View, PopoverContent: View>: View {
   private func beginDismissal() {
     guard !isDismissing else { return }
     isDismissing = true
+    if isPresented {
+      isPresented = false
+    }
 
     guard !reduceMotion else {
-      onDismissed()
+      completeDismissal()
       return
     }
 
-    withAnimation(.smooth(duration: 0.2)) {
+    withAnimation(.smooth(duration: 0.2), completionCriteria: .removed) {
       expansionProgress = 0
       dragOffset = .zero
     } completion: {
+      completeDismissal()
+    }
+  }
+
+  private func completeDismissal() {
+    onSourceHandoff()
+    Task { @MainActor in
+      // Keep the collapsed overlay mounted through at least one 30 Hz display frame
+      // so the restored source is ready before the keyboard-window host is removed.
+      try? await Task.sleep(for: .milliseconds(34))
       onDismissed()
     }
   }

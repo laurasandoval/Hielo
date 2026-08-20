@@ -4,6 +4,41 @@ import XCTest
 @testable import KeyboardFreeze
 
 final class KeyboardPopoverGeometryTests: XCTestCase {
+  func testStandardCornerRadiiInterpolateBetweenFlexibleSizes() {
+    let radii = KeyboardPopoverCornerRadii.standard
+
+    XCTAssertEqual(
+      radii.resolve(
+        sourceSize: CGSize(width: 48, height: 48),
+        destinationSize: CGSize(width: 250, height: 250),
+        expansionProgress: 0
+      ),
+      24
+    )
+    XCTAssertEqual(
+      radii.resolve(
+        sourceSize: CGSize(width: 48, height: 48),
+        destinationSize: CGSize(width: 250, height: 250),
+        expansionProgress: 0.5
+      ),
+      28
+    )
+    XCTAssertEqual(
+      radii.resolve(
+        sourceSize: CGSize(width: 48, height: 48),
+        destinationSize: CGSize(width: 250, height: 250),
+        expansionProgress: 1
+      ),
+      32
+    )
+  }
+
+  func testFixedCornerRadiusClampsToSurfaceSize() {
+    let radius = KeyboardPopoverCornerRadii.Radius.fixed(32)
+
+    XCTAssertEqual(radius.resolve(for: CGSize(width: 40, height: 20)), 10)
+  }
+
   func testLeadingAttachmentKeepsLeadingEdgeAndVerticalCenter() {
     let source = CGRect(x: 28, y: 560, width: 48, height: 48)
 

@@ -10,6 +10,7 @@ public struct KeyboardPopover<SourceContent: View, PopoverContent: View>: View {
   @Binding private var isPresented: Bool
 
   private let attachmentAnchor: UnitPoint
+  private let cornerRadii = KeyboardPopoverCornerRadii.standard
   private let sourceContent: SourceContent
   private let popoverContent: PopoverContent
 
@@ -38,7 +39,7 @@ public struct KeyboardPopover<SourceContent: View, PopoverContent: View>: View {
           .frame(width: sourceSize.width, height: sourceSize.height)
       } else {
         sourceContent
-          .glassEffect(.regular.interactive())
+          .glassEffect(.regular.interactive(), in: cornerRadii.collapsed.shape)
           .glassEffectTransition(.identity)
       }
     }
@@ -92,6 +93,8 @@ public struct KeyboardPopover<SourceContent: View, PopoverContent: View>: View {
           popoverContent: popoverContent,
           sourceFrame: context.sourceFrame,
           destinationFrame: destinationFrame(context),
+          cornerRadii: cornerRadii,
+          onSourceHandoff: prepareSourceHandoff,
           onDismissed: finishDismissal
         )
       }
@@ -117,6 +120,14 @@ public struct KeyboardPopover<SourceContent: View, PopoverContent: View>: View {
 
   private func requestDismissal() {
     isPresented = false
+  }
+
+  private func prepareSourceHandoff() {
+    var transaction = Transaction()
+    transaction.disablesAnimations = true
+    withTransaction(transaction) {
+      isHosted = false
+    }
   }
 
   private func finishDismissal() {
