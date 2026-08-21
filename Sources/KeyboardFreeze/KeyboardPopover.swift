@@ -106,6 +106,7 @@ public struct KeyboardPopover<SourceContent: View, PopoverContent: View>: View {
           sourceFrame: context.sourceFrame,
           destinationFrame: destinationFrame(context),
           shapeTransition: shapeTransition,
+          fadesSurface: sourceGlass == nil,
           onSourceHandoff: prepareSourceHandoff,
           onDismissed: finishDismissal
         )

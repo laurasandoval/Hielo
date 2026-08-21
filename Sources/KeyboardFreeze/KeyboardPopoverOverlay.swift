@@ -8,6 +8,7 @@ struct KeyboardPopoverOverlay<SourceContent: View, PopoverContent: View>: View {
   let sourceFrame: CGRect
   let destinationFrame: CGRect
   let shapeTransition: KeyboardPopoverShapeTransition
+  let fadesSurface: Bool
   let onSourceHandoff: @MainActor () -> Void
   let onDismissed: @MainActor () -> Void
 
@@ -18,36 +19,15 @@ struct KeyboardPopoverOverlay<SourceContent: View, PopoverContent: View>: View {
 
   var body: some View {
     ZStack {
-      ZStack {
-        sourceContent
-          .frame(width: sourceFrame.width, height: sourceFrame.height)
-          .scaleEffect(sourceContentScale, anchor: .center)
-          .position(
-            x: currentSurfaceFrame.width / 2,
-            y: currentSurfaceFrame.height / 2
-          )
-          .blur(radius: expansionProgress * 8)
-          .opacity(1 - expansionProgress)
-          .allowsHitTesting(false)
-          .accessibilityHidden(true)
-
-        popoverContent
-          .frame(width: destinationFrame.width, height: destinationFrame.height)
-          .scaleEffect(contentScale, anchor: .center)
-          .opacity(expansionProgress)
-          .position(
-            x: currentSurfaceFrame.width / 2,
-            y: currentSurfaceFrame.height / 2
-          )
-      }
-      .frame(
-        width: currentSurfaceFrame.width,
-        height: currentSurfaceFrame.height
-      )
-      .clipShape(surfaceShape)
-      .glassEffect(
-        .regular.interactive(),
-        in: surfaceShape
+      KeyboardPopoverSurface(
+        sourceContent: sourceContent,
+        popoverContent: popoverContent,
+        sourceSize: sourceFrame.size,
+        destinationSize: destinationFrame.size,
+        currentSize: currentSurfaceFrame.size,
+        shape: surfaceShape,
+        expansionProgress: expansionProgress,
+        fadesSurface: fadesSurface
       )
       .scaleEffect(dragScale)
       .offset(dragOffset)
@@ -86,15 +66,6 @@ struct KeyboardPopoverOverlay<SourceContent: View, PopoverContent: View>: View {
 
   private var surfaceCenter: CGPoint {
     CGPoint(x: currentSurfaceFrame.midX, y: currentSurfaceFrame.midY)
-  }
-
-  private var contentScale: Double {
-    guard destinationFrame.width > 0 else { return 1 }
-    return currentSurfaceFrame.width / destinationFrame.width
-  }
-
-  private var sourceContentScale: Double {
-    min(max(1 + expansionProgress * 0.5, 1), 1.5)
   }
 
   private var surfaceShape: UnevenRoundedRectangle {
