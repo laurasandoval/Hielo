@@ -20,6 +20,7 @@ struct KeyboardPopover<SourceContent: View, PopoverContent: View>: View {
   @State private var sourceFrameInScreen = CGRect.zero
   @State private var destinationSize = CGSize.zero
   @State private var isHosted = false
+  @State private var presentationTask: Task<Void, Never>?
 
   init(
     isPresented: Binding<Bool>,
@@ -83,17 +84,36 @@ struct KeyboardPopover<SourceContent: View, PopoverContent: View>: View {
     }
     .onChange(of: isPresented) { _, newValue in
       if newValue {
-        presentIfReady()
+        schedulePresentation()
+      } else {
+        presentationTask?.cancel()
+        presentationTask = nil
       }
     }
     .onDisappear(perform: tearDown)
   }
 
-  private func presentIfReady() {
+  private func schedulePresentation() {
     guard isPresented, !isHosted else { return }
-    guard sourceSize.width > 0, sourceSize.height > 0 else { return }
-    guard !sourceFrameInScreen.isEmpty else { return }
-    guard destinationSize.width > 0, destinationSize.height > 0 else { return }
+
+    presentationTask?.cancel()
+    presentationTask = Task { @MainActor in
+      try? await Task.sleep(for: KeyboardPopoverMotion.geometrySettleDelay)
+      guard !Task.isCancelled else { return }
+      presentIfReady()
+    }
+  }
+
+  private func presentIfReady() {
+    guard
+      KeyboardPopoverPresentationReadiness.canPresent(
+        isPresented: isPresented,
+        isHosted: isHosted,
+        resolvedSourceFrame: source.frameInScreen,
+        measuredSourceFrame: sourceFrameInScreen,
+        destinationSize: destinationSize
+      )
+    else { return }
     guard let keyboardFreeze else {
       isPresented = false
       return
@@ -120,8 +140,12 @@ struct KeyboardPopover<SourceContent: View, PopoverContent: View>: View {
     )
 
     if result.succeeded {
+      presentationTask?.cancel()
+      presentationTask = nil
       isHosted = true
     } else {
+      presentationTask?.cancel()
+      presentationTask = nil
       isPresented = false
     }
   }
@@ -165,11 +189,15 @@ struct KeyboardPopover<SourceContent: View, PopoverContent: View>: View {
   }
 
   private func finishDismissal() {
+    presentationTask?.cancel()
+    presentationTask = nil
     keyboardFreeze?.dismissOverlay()
     isHosted = false
   }
 
   private func tearDown() {
+    presentationTask?.cancel()
+    presentationTask = nil
     guard isHosted else { return }
     keyboardFreeze?.dismissOverlay()
     isHosted = false
