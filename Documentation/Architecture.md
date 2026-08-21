@@ -12,10 +12,16 @@ idle
 
 ## Overlay presentation
 
-The runtime captures and pauses the visible keyboard snapshot. A full-window
-presentation view is inserted into the system keyboard window with that
-snapshot and the SwiftUI overlay content above it. A matching interaction
+When a keyboard is visible, the runtime captures and pauses its snapshot. A
+full-window presentation view is inserted into the system keyboard window with
+that snapshot and the SwiftUI overlay content above it. A matching interaction
 shield blocks the app window while the presentation is active.
+
+When no keyboard capture is available, `KeyboardPopover` inserts the same
+presentation view into its source app window without a snapshot. Centered
+attachment-axis components resolve toward the nearest screen edge, so the
+popover grows toward the side with more available space. Explicit attachment
+components remain unchanged.
 
 The input remains focused, so the app retains its cursor and keyboard-driven
 layout.

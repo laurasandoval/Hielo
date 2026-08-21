@@ -1,6 +1,7 @@
 # KeyboardFreeze
 
-Freeze the visible iOS system keyboard and place custom SwiftUI content over it.
+Present morphing Liquid Glass popovers anywhere, including over a frozen iOS
+system keyboard.
 
 KeyboardFreeze is designed for interactions such as glass menus that open
 over the keyboard without dismissing it.
@@ -42,7 +43,9 @@ struct ChatView: View {
     VStack {
       Spacer()
 
-      Button("Open menu", systemImage: "plus", action: openMenu)
+      Button("Open menu", systemImage: "plus") {
+        isMenuPresented = true
+      }
         .frame(width: 48, height: 48)
         .keyboardPopover(
           isPresented: $isMenuPresented,
@@ -57,16 +60,14 @@ struct ChatView: View {
     }
     .keyboardFreeze(keyboardFreeze)
   }
-
-  private func openMenu() {
-    isMenuPresented = true
-  }
 }
 ```
 
 The modifier supplies the Liquid Glass surface. Both the source and expanded
 content can contain any SwiftUI view. Expanded content can hug its content or
 set a fixed size with `frame`; no package-specific sizing style is required.
+When the keyboard is visible, the popover freezes it and presents above its
+snapshot. Without a keyboard, the same popover presents in the app window.
 
 The default transition expands from a capsule into a continuously rounded
 rectangle with a 32-point corner radius. Customize both ends with familiar
@@ -98,21 +99,24 @@ pass `sourceGlass: nil`. The expanded popover remains Liquid Glass:
 }
 ```
 
-`.leading` means leading-center. Standard `UnitPoint` values such as `.top`,
-`.bottomTrailing`, and `.center`, as well as custom unit points, are also
-supported. The real text input stays focused. Taps outside dismiss the popover,
-and the expanded surface can be dragged in any direction. Only a downward
-release dismisses it.
+`.leading` means leading-center over a keyboard. In the app window, its centered
+axis adapts to the source position, becoming top-leading or bottom-leading so
+the popover expands into the available space. `.trailing`, `.top`, and `.bottom`
+adapt the same way. Explicit corners such as `.bottomTrailing`, as well as
+custom unit points, remain supported. The real text input stays focused when
+one is active. Taps outside dismiss the popover, and the expanded surface can be
+dragged in any direction. Only a downward release dismisses it.
 
 For fully custom presentations, `presentOverlay` and `KeyboardFreezeSource`
 remain available as lower-level APIs.
 
 ## Failure handling
 
-Low-level presentation methods return `KeyboardFreezeActivationResult`. A
-missing or changed private runtime returns `.keyboardUnavailable` and leaves
-the live keyboard alone. `keyboardPopover` fails closed by resetting its
-presentation binding to `false`.
+Low-level keyboard-presentation methods return `KeyboardFreezeActivationResult`.
+A missing or changed private runtime returns `.keyboardUnavailable` and leaves
+the live keyboard alone. `keyboardPopover` falls back to the app window when a
+keyboard capture is unavailable and fails closed only when it cannot resolve
+its source or host.
 
 Use one `KeyboardFreeze` instance per screen or flow. Call `cancel()` when a
 manually managed session is no longer needed; the default host lifecycle

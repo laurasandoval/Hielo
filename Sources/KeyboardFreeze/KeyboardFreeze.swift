@@ -120,6 +120,39 @@ public final class KeyboardFreeze {
     )
   }
 
+  @discardableResult
+  func presentAdaptiveOverlay<Content: View>(
+    from source: KeyboardFreezeSource,
+    sourceFrame: CGRect,
+    overlayFrame: (Context) -> CGRect,
+    onOutsideTap: (@MainActor () -> Void)? = nil,
+    @ViewBuilder content: (Context) -> Content
+  ) -> KeyboardFreezeActivationResult {
+    guard case .idle = storage else {
+      return .blockedByActivePresentation(status)
+    }
+
+    if let capture = runtime.capture() {
+      return startOverlayPresentation(
+        capture: capture,
+        sourceFrame: sourceFrame,
+        overlayFrame: overlayFrame,
+        onOutsideTap: onOutsideTap,
+        content: { AnyView(content($0)) }
+      )
+    }
+
+    guard let resolution = source.resolveWindow() else {
+      return .sourceUnavailable
+    }
+    return startScreenOverlayPresentation(
+      resolution: resolution,
+      overlayFrame: overlayFrame,
+      onOutsideTap: onOutsideTap,
+      content: { AnyView(content($0)) }
+    )
+  }
+
   /// Mounts custom SwiftUI content using explicit screen coordinates.
   @discardableResult
   public func presentOverlay<Content: View>(
@@ -372,9 +405,35 @@ public final class KeyboardFreeze {
     )
     runtime.pauseSnapshot(capture.snapshotView)
     let presentation = KeyboardFreezeOverlayPresentation(
-      keyboardWindow: keyboardWindow,
-      keyboardSnapshotView: capture.snapshotView,
-      keyboardFrame: context.keyboardFrame,
+      hostWindow: keyboardWindow,
+      backgroundView: capture.snapshotView,
+      backgroundFrame: context.keyboardFrame,
+      overlayFrame: overlayFrame(context),
+      onOutsideTap: outsideTapAction,
+      content: content(context)
+    )
+    setStorage(.overlay(presentation))
+    return .started
+  }
+
+  private func startScreenOverlayPresentation(
+    resolution: KeyboardFreezeSource.WindowResolution,
+    overlayFrame: (Context) -> CGRect,
+    onOutsideTap: (@MainActor () -> Void)?,
+    content: (Context) -> AnyView
+  ) -> KeyboardFreezeActivationResult {
+    let hostWindow = resolution.window
+    let outsideTapAction =
+      onOutsideTap ?? { [weak self] in
+        self?.dismissOverlay()
+      }
+    let context = Context(
+      windowBounds: hostWindow.bounds,
+      keyboardFrame: .zero,
+      sourceFrame: hostWindow.convert(resolution.frameInScreen, from: nil)
+    )
+    let presentation = KeyboardFreezeOverlayPresentation(
+      hostWindow: hostWindow,
       overlayFrame: overlayFrame(context),
       onOutsideTap: outsideTapAction,
       content: content(context)

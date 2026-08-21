@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// A source view that expands into custom content over a frozen keyboard.
+/// A source view that expands into custom content over a frozen keyboard or app.
 ///
 /// Create this view with a `keyboardPopover` view modifier.
 /// The nearest ``View/keyboardFreeze(_:lifecycle:)`` modifier supplies the
@@ -16,8 +16,8 @@ public struct KeyboardPopover<SourceContent: View, PopoverContent: View>: View {
   private let popoverContent: PopoverContent
 
   @Environment(\.keyboardFreezeSession) private var keyboardFreeze
+  @State private var source = KeyboardFreezeSource()
   @State private var sourceFrameInScreen = CGRect.zero
-  @State private var sourceSize = CGSize.zero
   @State private var destinationSize = CGSize.zero
   @State private var isHosted = false
 
@@ -55,6 +55,7 @@ public struct KeyboardPopover<SourceContent: View, PopoverContent: View>: View {
           .glassEffectTransition(.identity)
       }
     }
+    .keyboardFreezeSource(source)
     .accessibilityHidden(isHosted)
     .background {
       popoverContent
@@ -69,11 +70,13 @@ public struct KeyboardPopover<SourceContent: View, PopoverContent: View>: View {
           presentIfReady()
         }
     }
+    .onChange(of: source.frameInScreen) {
+      presentIfReady()
+    }
     .onGeometryChange(for: CGRect.self) { proxy in
       proxy.frame(in: .global)
     } action: { newFrame in
       sourceFrameInScreen = newFrame
-      sourceSize = newFrame.size
       presentIfReady()
     }
     .onChange(of: isPresented) { _, newValue in
@@ -94,7 +97,8 @@ public struct KeyboardPopover<SourceContent: View, PopoverContent: View>: View {
       return
     }
 
-    let result = keyboardFreeze.presentOverlay(
+    let result = keyboardFreeze.presentAdaptiveOverlay(
+      from: source,
       sourceFrame: sourceFrameInScreen,
       overlayFrame: destinationFrame,
       onOutsideTap: requestDismissal,
@@ -123,12 +127,27 @@ public struct KeyboardPopover<SourceContent: View, PopoverContent: View>: View {
   private func destinationFrame(
     _ context: KeyboardFreeze.Context
   ) -> CGRect {
-    KeyboardPopoverGeometry.destinationFrame(
+    let resolvedAnchor =
+      if context.keyboardFrame.isEmpty {
+        KeyboardPopoverGeometry.adaptiveAttachmentAnchor(
+          preferredAnchor: attachmentAnchor,
+          sourceFrame: context.sourceFrame,
+          windowBounds: context.windowBounds
+        )
+      } else {
+        attachmentAnchor
+      }
+
+    return KeyboardPopoverGeometry.destinationFrame(
       sourceFrame: context.sourceFrame,
       destinationSize: destinationSize,
-      attachmentAnchor: attachmentAnchor,
+      attachmentAnchor: resolvedAnchor,
       windowBounds: context.windowBounds
     )
+  }
+
+  private var sourceSize: CGSize {
+    sourceFrameInScreen.size
   }
 
   private func requestDismissal() {

@@ -1,6 +1,25 @@
 import SwiftUI
 
 struct KeyboardPopoverGeometry {
+  static func adaptiveAttachmentAnchor(
+    preferredAnchor: UnitPoint,
+    sourceFrame: CGRect,
+    windowBounds: CGRect
+  ) -> UnitPoint {
+    UnitPoint(
+      x: resolvedComponent(
+        preferredAnchor.x,
+        sourceMidpoint: sourceFrame.midX,
+        windowMidpoint: windowBounds.midX
+      ),
+      y: resolvedComponent(
+        preferredAnchor.y,
+        sourceMidpoint: sourceFrame.midY,
+        windowMidpoint: windowBounds.midY
+      )
+    )
+  }
+
   static func destinationFrame(
     sourceFrame: CGRect,
     destinationSize: CGSize,
@@ -57,5 +76,16 @@ struct KeyboardPopoverGeometry {
     guard magnitude > 0 else { return 0 }
     let resistedMagnitude = limit * (1 - 1 / (magnitude / limit + 1))
     return value < 0 ? -resistedMagnitude : resistedMagnitude
+  }
+
+  private static func resolvedComponent(
+    _ preferredComponent: Double,
+    sourceMidpoint: Double,
+    windowMidpoint: Double
+  ) -> Double {
+    guard abs(preferredComponent - 0.5) < 0.001 else {
+      return preferredComponent
+    }
+    return sourceMidpoint <= windowMidpoint ? 0 : 1
   }
 }

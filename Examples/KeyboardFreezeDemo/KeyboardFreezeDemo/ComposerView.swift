@@ -6,28 +6,28 @@ struct ComposerView: View {
   @Binding var isMenuPresented: Bool
   @Binding var isPlainMenuPresented: Bool
   let inputIsFocused: FocusState<Bool>.Binding
-  let openMenu: () -> Void
-  let openPlainMenu: () -> Void
 
   var body: some View {
     GlassEffectContainer(spacing: 12) {
       HStack(spacing: 12) {
-        Button("Open menu", systemImage: "plus", action: openMenu)
-          .labelStyle(.iconOnly)
-          .font(.title3)
-          .frame(width: 48, height: 48)
-          .contentShape(.circle)
-          .buttonStyle(.plain)
-          .keyboardPopover(
-            isPresented: $isMenuPresented,
-            attachmentAnchor: .leading,
-            sourceShape: .capsule,
-            popoverShape: .rect(cornerRadius: 32)
-          ) {
-            Text("Hello World")
-              .font(.headline)
-              .frame(width: 250, height: 250)
-          }
+        Button("Open menu", systemImage: "plus") {
+          isMenuPresented = true
+        }
+        .labelStyle(.iconOnly)
+        .font(.title3)
+        .frame(width: 48, height: 48)
+        .contentShape(.circle)
+        .buttonStyle(.plain)
+        .keyboardPopover(
+          isPresented: $isMenuPresented,
+          attachmentAnchor: .leading,
+          sourceShape: .capsule,
+          popoverShape: .rect(cornerRadius: 32)
+        ) {
+          Text("Hello World")
+            .font(.headline)
+            .frame(width: 250, height: 250)
+        }
 
         HStack(spacing: 8) {
           TextField("Message", text: $text)
@@ -36,9 +36,10 @@ struct ComposerView: View {
 
           Button(
             "Open plain menu",
-            systemImage: "paperclip",
-            action: openPlainMenu
-          )
+            systemImage: "paperclip"
+          ) {
+            isPlainMenuPresented = true
+          }
           .labelStyle(.iconOnly)
           .foregroundStyle(.primary)
           .frame(width: 44, height: 44)
@@ -71,9 +72,7 @@ struct ComposerView: View {
     text: $text,
     isMenuPresented: .constant(false),
     isPlainMenuPresented: .constant(false),
-    inputIsFocused: $inputIsFocused,
-    openMenu: {},
-    openPlainMenu: {}
+    inputIsFocused: $inputIsFocused
   )
   .padding()
 }

@@ -6,6 +6,11 @@ import UIKit
 @MainActor
 @Observable
 public final class KeyboardFreezeSource {
+  struct WindowResolution {
+    let frameInScreen: CGRect
+    let window: UIWindow
+  }
+
   public private(set) var frameInScreen: CGRect?
 
   @ObservationIgnored private var screen: UIScreen?
@@ -16,6 +21,11 @@ public final class KeyboardFreezeSource {
   func resolveFrame(on expectedScreen: UIScreen) -> CGRect? {
     guard screen === expectedScreen else { return nil }
     return frameInScreen
+  }
+
+  func resolveWindow() -> WindowResolution? {
+    guard let frameInScreen, let window = owner?.window else { return nil }
+    return WindowResolution(frameInScreen: frameInScreen, window: window)
   }
 
   func update(frameInScreen: CGRect, screen: UIScreen, owner: UIView) {

@@ -7,9 +7,9 @@ final class KeyboardFreezeOverlayPresentation: NSObject, UIGestureRecognizerDele
   private let hostingController: UIHostingController<AnyView>
 
   init(
-    keyboardWindow: UIWindow,
-    keyboardSnapshotView: UIView,
-    keyboardFrame: CGRect,
+    hostWindow: UIWindow,
+    backgroundView: UIView? = nil,
+    backgroundFrame: CGRect = .zero,
     overlayFrame: CGRect,
     onOutsideTap: @escaping @MainActor () -> Void,
     content: AnyView
@@ -20,21 +20,23 @@ final class KeyboardFreezeOverlayPresentation: NSObject, UIGestureRecognizerDele
     super.init()
 
     presentationView.backgroundColor = .clear
-    presentationView.frame = keyboardWindow.bounds
+    presentationView.frame = hostWindow.bounds
     presentationView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
     presentationView.accessibilityViewIsModal = true
 
-    keyboardSnapshotView.frame = keyboardFrame
-    keyboardSnapshotView.isUserInteractionEnabled = false
-    keyboardSnapshotView.accessibilityElementsHidden = true
-    presentationView.addSubview(keyboardSnapshotView)
+    if let backgroundView {
+      backgroundView.frame = backgroundFrame
+      backgroundView.isUserInteractionEnabled = false
+      backgroundView.accessibilityElementsHidden = true
+      presentationView.addSubview(backgroundView)
+    }
 
     hostingController.view.backgroundColor = .clear
     hostingController.view.frame = overlayFrame
     presentationView.addSubview(hostingController.view)
 
     presentationView.addGestureRecognizer(makeOutsideTapRecognizer())
-    keyboardWindow.addSubview(presentationView)
+    hostWindow.addSubview(presentationView)
   }
 
   func tearDown() {

@@ -103,6 +103,36 @@ final class KeyboardPopoverGeometryTests: XCTestCase {
     XCTAssertEqual(destination.midY, source.midY, accuracy: 0.001)
   }
 
+  func testAdaptiveLeadingAnchorUsesBottomLeadingForBottomSource() {
+    let anchor = KeyboardPopoverGeometry.adaptiveAttachmentAnchor(
+      preferredAnchor: .leading,
+      sourceFrame: CGRect(x: 28, y: 760, width: 48, height: 48),
+      windowBounds: CGRect(x: 0, y: 0, width: 390, height: 844)
+    )
+
+    XCTAssertEqual(anchor, .bottomLeading)
+  }
+
+  func testAdaptiveTrailingAnchorUsesTopTrailingForTopSource() {
+    let anchor = KeyboardPopoverGeometry.adaptiveAttachmentAnchor(
+      preferredAnchor: .trailing,
+      sourceFrame: CGRect(x: 314, y: 60, width: 48, height: 48),
+      windowBounds: CGRect(x: 0, y: 0, width: 390, height: 844)
+    )
+
+    XCTAssertEqual(anchor, .topTrailing)
+  }
+
+  func testAdaptiveAnchorPreservesExplicitCorner() {
+    let anchor = KeyboardPopoverGeometry.adaptiveAttachmentAnchor(
+      preferredAnchor: .topLeading,
+      sourceFrame: CGRect(x: 314, y: 760, width: 48, height: 48),
+      windowBounds: CGRect(x: 0, y: 0, width: 390, height: 844)
+    )
+
+    XCTAssertEqual(anchor, .topLeading)
+  }
+
   func testBottomTrailingAttachmentUsesTheMatchingSourceCorner() {
     let source = CGRect(x: 300, y: 500, width: 48, height: 48)
 

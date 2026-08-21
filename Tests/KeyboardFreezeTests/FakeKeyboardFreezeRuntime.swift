@@ -45,7 +45,7 @@ final class FakeKeyboardFreezeRuntime: KeyboardFreezeRuntimeProviding {
     return runtime
   }
 
-  private static func makeWindow() -> UIWindow {
+  static func makeWindow() -> UIWindow {
     let selector = NSSelectorFromString("new")
     guard let method = class_getClassMethod(UIWindow.self, selector) else {
       fatalError("UIWindow must inherit NSObject.new")
