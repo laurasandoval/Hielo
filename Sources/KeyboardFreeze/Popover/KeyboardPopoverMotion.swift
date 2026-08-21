@@ -7,7 +7,8 @@ enum KeyboardPopoverMotion {
   static let sourceScaleIncrease = 0.5
   static let maximumSourceScale = 1.5
 
-  static let dragMinimumDistance = 4.0
+  static let dragPredictionTime = 0.2
+  static let scrollBoundaryTolerance = 1.0
   static let horizontalDragLimit = 44.0
   static let upwardDragLimit = 36.0
   static let downwardDragLimit = 80.0

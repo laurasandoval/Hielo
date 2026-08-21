@@ -24,9 +24,7 @@ struct ComposerView: View {
           sourceShape: .capsule,
           popoverShape: .rect(cornerRadius: 32)
         ) {
-          Text("Hello World")
-            .font(.headline)
-            .frame(width: 250, height: 250)
+          PopoverContentDemoView()
         }
 
         HStack(spacing: 8) {

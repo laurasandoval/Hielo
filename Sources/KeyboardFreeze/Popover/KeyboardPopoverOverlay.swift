@@ -32,7 +32,14 @@ struct KeyboardPopoverOverlay<SourceContent: View, PopoverContent: View>: View {
       .scaleEffect(dragScale)
       .offset(dragOffset)
       .contentShape(surfaceShape)
-      .simultaneousGesture(dragGesture)
+      .gesture(
+        KeyboardPopoverPanGesture(
+          isEnabled: expansionProgress == 1 && !isDismissing,
+          onChanged: updateDrag,
+          onEnded: endDrag,
+          onCancelled: springBack
+        )
+      )
       .position(surfaceCenter)
     }
     .frame(width: destinationFrame.width, height: destinationFrame.height)
@@ -80,26 +87,27 @@ struct KeyboardPopoverOverlay<SourceContent: View, PopoverContent: View>: View {
     KeyboardPopoverDragBehavior.scale(for: dragOffset)
   }
 
-  private var dragGesture: some Gesture {
-    DragGesture(minimumDistance: KeyboardPopoverMotion.dragMinimumDistance)
-      .onChanged { value in
-        guard expansionProgress == 1, !isDismissing else { return }
-        dragOffset = KeyboardPopoverDragBehavior.rubberBandedOffset(
-          for: value.translation
-        )
-      }
-      .onEnded { value in
-        guard expansionProgress == 1, !isDismissing else { return }
-        if KeyboardPopoverDragBehavior.shouldDismiss(
-          translation: value.translation,
-          predictedEndTranslation: value.predictedEndTranslation
-        ) {
-          isPresented = false
-          beginDismissal()
-        } else {
-          springBack()
-        }
-      }
+  private func updateDrag(_ translation: CGSize) {
+    guard expansionProgress == 1, !isDismissing else { return }
+    dragOffset = KeyboardPopoverDragBehavior.rubberBandedOffset(
+      for: translation
+    )
+  }
+
+  private func endDrag(
+    _ translation: CGSize,
+    _ predictedEndTranslation: CGSize
+  ) {
+    guard expansionProgress == 1, !isDismissing else { return }
+    if KeyboardPopoverDragBehavior.shouldDismiss(
+      translation: translation,
+      predictedEndTranslation: predictedEndTranslation
+    ) {
+      isPresented = false
+      beginDismissal()
+    } else {
+      springBack()
+    }
   }
 
   private func interpolate(_ collapsedValue: Double, _ expandedValue: Double) -> Double {

@@ -1,6 +1,31 @@
 import CoreGraphics
 
 enum KeyboardPopoverDragBehavior {
+  static func popoverShouldOwnGesture(
+    velocity: CGSize,
+    canScrollHorizontally: Bool,
+    canScrollVertically: Bool,
+    verticalDistanceFromTop: Double
+  ) -> Bool {
+    if abs(velocity.width) > abs(velocity.height) {
+      return !canScrollHorizontally
+    }
+
+    guard canScrollVertically else { return true }
+    guard velocity.height > 0 else { return false }
+    return verticalDistanceFromTop <= KeyboardPopoverMotion.scrollBoundaryTolerance
+  }
+
+  static func predictedEndTranslation(
+    translation: CGSize,
+    velocity: CGSize
+  ) -> CGSize {
+    CGSize(
+      width: translation.width + velocity.width * KeyboardPopoverMotion.dragPredictionTime,
+      height: translation.height + velocity.height * KeyboardPopoverMotion.dragPredictionTime
+    )
+  }
+
   static func rubberBandedOffset(for translation: CGSize) -> CGSize {
     CGSize(
       width: rubberBand(
