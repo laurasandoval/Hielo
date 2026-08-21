@@ -4,10 +4,16 @@ import SwiftUI
 import UIKit
 
 struct OverlayDemoView: View {
+  private enum Menu {
+    case glass
+    case plain
+  }
+
   @State private var keyboardFreeze = KeyboardFreeze()
   @State private var text = ""
   @State private var isMenuPresented = false
-  @State private var isWaitingForKeyboard = false
+  @State private var isPlainMenuPresented = false
+  @State private var pendingMenu: Menu?
   @State private var keyboardIsVisible = false
   @FocusState private var inputIsFocused: Bool
 
@@ -17,17 +23,28 @@ struct OverlayDemoView: View {
         .fill(.background)
         .ignoresSafeArea()
 
+      ScrollView {
+        Color.clear
+          .frame(height: 1)
+      }
+      .contentShape(.rect)
+      .onTapGesture {
+        inputIsFocused = false
+      }
+      .scrollDismissesKeyboard(.interactively)
+
       VStack {
         Spacer()
 
         ComposerView(
           text: $text,
           isMenuPresented: $isMenuPresented,
+          isPlainMenuPresented: $isPlainMenuPresented,
           inputIsFocused: $inputIsFocused,
-          openMenu: requestMenu
+          openMenu: { requestMenu(.glass) },
+          openPlainMenu: { requestMenu(.plain) }
         )
-        .padding(.horizontal, composerSpacing)
-        .padding(.bottom, composerSpacing)
+        .padding(composerSpacing)
         .animation(
           .smooth(duration: 0.2),
           value: inputIsFocused
@@ -51,31 +68,36 @@ struct OverlayDemoView: View {
   }
 
   private var composerSpacing: CGFloat {
-    inputIsFocused ? 12 : 28
+    inputIsFocused ? 16 : 28
   }
 
-  private func requestMenu() {
+  private func requestMenu(_ menu: Menu) {
     guard keyboardIsVisible else {
-      isWaitingForKeyboard = true
+      pendingMenu = menu
       inputIsFocused = true
       return
     }
-    presentMenu()
+    present(menu)
   }
 
   private func handleKeyboardDidShow(_: Notification) {
     keyboardIsVisible = true
-    guard isWaitingForKeyboard else { return }
-    isWaitingForKeyboard = false
-    presentMenu()
+    guard let pendingMenu else { return }
+    self.pendingMenu = nil
+    present(pendingMenu)
   }
 
   private func handleKeyboardDidHide(_: Notification) {
     keyboardIsVisible = false
   }
 
-  private func presentMenu() {
-    isMenuPresented = true
+  private func present(_ menu: Menu) {
+    switch menu {
+    case .glass:
+      isMenuPresented = true
+    case .plain:
+      isPlainMenuPresented = true
+    }
   }
 }
 

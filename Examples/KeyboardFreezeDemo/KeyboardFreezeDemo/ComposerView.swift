@@ -4,8 +4,10 @@ import SwiftUI
 struct ComposerView: View {
   @Binding var text: String
   @Binding var isMenuPresented: Bool
+  @Binding var isPlainMenuPresented: Bool
   let inputIsFocused: FocusState<Bool>.Binding
   let openMenu: () -> Void
+  let openPlainMenu: () -> Void
 
   var body: some View {
     GlassEffectContainer(spacing: 12) {
@@ -27,12 +29,35 @@ struct ComposerView: View {
               .frame(width: 250, height: 250)
           }
 
-        TextField("Text", text: $text, axis: .vertical)
-          .focused(inputIsFocused)
-          .lineLimit(1)
-          .padding(.horizontal, 16)
-          .frame(maxWidth: .infinity, minHeight: 48, maxHeight: 48)
-          .glassEffect(.regular.interactive(), in: .capsule)
+        HStack(spacing: 8) {
+          TextField("Message", text: $text)
+            .focused(inputIsFocused)
+            .padding(.leading, 16)
+
+          Button(
+            "Open plain menu",
+            systemImage: "paperclip",
+            action: openPlainMenu
+          )
+          .labelStyle(.iconOnly)
+          .foregroundStyle(.primary)
+          .frame(width: 44, height: 44)
+          .contentShape(.circle)
+          .buttonStyle(.plain)
+          .keyboardPopover(
+            isPresented: $isPlainMenuPresented,
+            attachmentAnchor: .trailing,
+            sourceGlass: nil,
+            sourceShape: .circle,
+            popoverShape: .rect(cornerRadius: 32)
+          ) {
+            Text("Plain button")
+              .font(.headline)
+              .frame(width: 250, height: 250)
+          }
+        }
+        .frame(maxWidth: .infinity, minHeight: 48, maxHeight: 48)
+        .glassEffect(.regular.interactive(), in: .capsule)
       }
     }
   }
@@ -45,8 +70,10 @@ struct ComposerView: View {
   ComposerView(
     text: $text,
     isMenuPresented: .constant(false),
+    isPlainMenuPresented: .constant(false),
     inputIsFocused: $inputIsFocused,
-    openMenu: {}
+    openMenu: {},
+    openPlainMenu: {}
   )
   .padding()
 }
