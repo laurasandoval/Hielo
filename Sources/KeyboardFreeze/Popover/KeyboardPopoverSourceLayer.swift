@@ -14,13 +14,16 @@ struct KeyboardPopoverSourceLayer<Content: View>: View {
         x: containerSize.width / 2,
         y: containerSize.height / 2
       )
-      .blur(radius: expansionProgress * 8)
+      .blur(radius: expansionProgress * KeyboardPopoverMotion.sourceBlurRadius)
       .opacity(1 - expansionProgress)
       .allowsHitTesting(false)
       .accessibilityHidden(true)
   }
 
   private var sourceScale: Double {
-    min(max(1 + expansionProgress * 0.5, 1), 1.5)
+    min(
+      max(1 + expansionProgress * KeyboardPopoverMotion.sourceScaleIncrease, 1),
+      KeyboardPopoverMotion.maximumSourceScale
+    )
   }
 }

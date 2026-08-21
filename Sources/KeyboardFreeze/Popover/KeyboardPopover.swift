@@ -6,7 +6,7 @@ import SwiftUI
 /// The nearest ``View/keyboardFreeze(_:lifecycle:)`` modifier supplies the
 /// keyboard-freeze session used for presentation.
 @MainActor
-public struct KeyboardPopover<SourceContent: View, PopoverContent: View>: View {
+struct KeyboardPopover<SourceContent: View, PopoverContent: View>: View {
   @Binding private var isPresented: Bool
 
   private let attachmentAnchor: UnitPoint
@@ -21,7 +21,7 @@ public struct KeyboardPopover<SourceContent: View, PopoverContent: View>: View {
   @State private var destinationSize = CGSize.zero
   @State private var isHosted = false
 
-  public init(
+  init(
     isPresented: Binding<Bool>,
     attachmentAnchor: UnitPoint = .leading,
     sourceGlass: Glass? = .regular.interactive(),
@@ -41,7 +41,7 @@ public struct KeyboardPopover<SourceContent: View, PopoverContent: View>: View {
     popoverContent = content()
   }
 
-  public var body: some View {
+  var body: some View {
     ZStack {
       if isHosted {
         Color.clear
@@ -71,6 +71,8 @@ public struct KeyboardPopover<SourceContent: View, PopoverContent: View>: View {
         }
     }
     .onChange(of: source.frameInScreen) {
+      // UIKit identifies the source's app window while SwiftUI supplies screen
+      // coordinates that stay correct when the overlay crosses window boundaries.
       presentIfReady()
     }
     .onGeometryChange(for: CGRect.self) { proxy in
@@ -129,7 +131,7 @@ public struct KeyboardPopover<SourceContent: View, PopoverContent: View>: View {
   ) -> CGRect {
     let resolvedAnchor =
       if context.keyboardFrame.isEmpty {
-        KeyboardPopoverGeometry.adaptiveAttachmentAnchor(
+        KeyboardPopoverPlacement.adaptiveAttachmentAnchor(
           preferredAnchor: attachmentAnchor,
           sourceFrame: context.sourceFrame,
           windowBounds: context.windowBounds
@@ -138,7 +140,7 @@ public struct KeyboardPopover<SourceContent: View, PopoverContent: View>: View {
         attachmentAnchor
       }
 
-    return KeyboardPopoverGeometry.destinationFrame(
+    return KeyboardPopoverPlacement.destinationFrame(
       sourceFrame: context.sourceFrame,
       destinationSize: destinationSize,
       attachmentAnchor: resolvedAnchor,

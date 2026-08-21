@@ -6,13 +6,28 @@ on:
   pull_request:
 
 jobs:
-  build:
+  test:
     runs-on: macos-26
     steps:
       - uses: actions/checkout@v5
-      - name: Build package and tests
-        run: >-
-          xcodebuild build-for-testing
-          -scheme KeyboardFreeze
-          -destination 'generic/platform=iOS Simulator'
-          CODE_SIGNING_ALLOWED=NO
+      - name: Lint Swift
+        run: xcrun swift-format lint --recursive Sources Tests Examples
+      - name: Select simulator
+        run: |
+          simulator_id="$(xcrun simctl list devices available -j | jq -r \
+            '[.devices[][] | select(.name | startswith("iPhone"))][0].udid')"
+          test -n "$simulator_id" -a "$simulator_id" != "null"
+          echo "SIMULATOR_ID=$simulator_id" >> "$GITHUB_ENV"
+      - name: Run package tests
+        run: |
+          xcodebuild test \
+            -scheme KeyboardFreeze \
+            -destination "platform=iOS Simulator,id=$SIMULATOR_ID" \
+            CODE_SIGNING_ALLOWED=NO
+      - name: Build example app
+        run: |
+          xcodebuild build \
+            -project Examples/KeyboardFreezeDemo/KeyboardFreezeDemo.xcodeproj \
+            -scheme KeyboardFreezeDemo \
+            -destination "platform=iOS Simulator,id=$SIMULATOR_ID" \
+            CODE_SIGNING_ALLOWED=NO

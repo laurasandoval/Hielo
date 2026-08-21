@@ -1,28 +1,6 @@
 import ObjectiveC
 import UIKit
 
-@MainActor
-protocol KeyboardFreezeRuntimeProviding {
-  func capture() -> KeyboardFreezeRuntime.Capture?
-  func keyboardWindows(on screen: UIScreen) -> [UIWindow]
-  func pauseSnapshot(_ snapshotView: UIView)
-}
-
-@MainActor
-struct LiveKeyboardFreezeRuntime: KeyboardFreezeRuntimeProviding {
-  func capture() -> KeyboardFreezeRuntime.Capture? {
-    KeyboardFreezeRuntime.capture()
-  }
-
-  func keyboardWindows(on screen: UIScreen) -> [UIWindow] {
-    KeyboardFreezeRuntime.keyboardWindows(on: screen)
-  }
-
-  func pauseSnapshot(_ snapshotView: UIView) {
-    KeyboardFreezeRuntime.pauseSnapshot(snapshotView)
-  }
-}
-
 /// Runtime lookup for the live keyboard surface and a frozen snapshot of it.
 ///
 /// Private symbol names are assembled at runtime and every lookup fails closed.

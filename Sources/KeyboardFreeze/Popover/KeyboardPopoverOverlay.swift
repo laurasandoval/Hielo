@@ -77,20 +77,20 @@ struct KeyboardPopoverOverlay<SourceContent: View, PopoverContent: View>: View {
   }
 
   private var dragScale: Double {
-    KeyboardPopoverGeometry.dragScale(for: dragOffset)
+    KeyboardPopoverDragBehavior.scale(for: dragOffset)
   }
 
   private var dragGesture: some Gesture {
-    DragGesture(minimumDistance: 4)
+    DragGesture(minimumDistance: KeyboardPopoverMotion.dragMinimumDistance)
       .onChanged { value in
         guard expansionProgress == 1, !isDismissing else { return }
-        dragOffset = KeyboardPopoverGeometry.rubberBandedOffset(
+        dragOffset = KeyboardPopoverDragBehavior.rubberBandedOffset(
           for: value.translation
         )
       }
       .onEnded { value in
         guard expansionProgress == 1, !isDismissing else { return }
-        if KeyboardPopoverGeometry.shouldDismiss(
+        if KeyboardPopoverDragBehavior.shouldDismiss(
           translation: value.translation,
           predictedEndTranslation: value.predictedEndTranslation
         ) {
@@ -113,14 +113,14 @@ struct KeyboardPopoverOverlay<SourceContent: View, PopoverContent: View>: View {
     if reduceMotion {
       expansionProgress = 1
     } else {
-      withAnimation(.smooth(duration: 0.2)) {
+      withAnimation(.smooth(duration: KeyboardPopoverMotion.animationDuration)) {
         expansionProgress = 1
       }
     }
   }
 
   private func springBack() {
-    withAnimation(.smooth(duration: 0.2)) {
+    withAnimation(.smooth(duration: KeyboardPopoverMotion.animationDuration)) {
       dragOffset = .zero
     }
   }
@@ -137,7 +137,10 @@ struct KeyboardPopoverOverlay<SourceContent: View, PopoverContent: View>: View {
       return
     }
 
-    withAnimation(.smooth(duration: 0.2), completionCriteria: .removed) {
+    withAnimation(
+      .smooth(duration: KeyboardPopoverMotion.animationDuration),
+      completionCriteria: .removed
+    ) {
       expansionProgress = 0
       dragOffset = .zero
     } completion: {
@@ -150,7 +153,7 @@ struct KeyboardPopoverOverlay<SourceContent: View, PopoverContent: View>: View {
     Task { @MainActor in
       // Keep the collapsed overlay mounted through at least one 30 Hz display frame
       // so the restored source is ready before the keyboard-window host is removed.
-      try? await Task.sleep(for: .milliseconds(34))
+      try? await Task.sleep(for: KeyboardPopoverMotion.sourceHandoffDelay)
       onDismissed()
     }
   }

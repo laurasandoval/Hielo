@@ -54,10 +54,11 @@ final class KeyboardFreezeTests: XCTestCase {
     let result = session.presentAdaptiveOverlay(
       from: source,
       sourceFrame: owner.convert(owner.bounds, to: nil),
-      overlayFrame: { _ in CGRect(x: 28, y: 558, width: 250, height: 250) }
-    ) { _ in
-      Text("Popover")
-    }
+      overlayFrame: { _ in CGRect(x: 28, y: 558, width: 250, height: 250) },
+      content: { _ in
+        Text("Popover")
+      }
+    )
 
     XCTAssertEqual(result, .started)
     XCTAssertEqual(session.status, .overlay)
@@ -75,10 +76,11 @@ final class KeyboardFreezeTests: XCTestCase {
     let result = session.presentAdaptiveOverlay(
       from: KeyboardFreezeSource(),
       sourceFrame: sourceFrame,
-      overlayFrame: { _ in CGRect(x: 28, y: 558, width: 250, height: 250) }
-    ) { context in
-      Text("\(context.sourceFrame.minX)")
-    }
+      overlayFrame: { _ in CGRect(x: 28, y: 558, width: 250, height: 250) },
+      content: { context in
+        Text("\(context.sourceFrame.minX)")
+      }
+    )
 
     XCTAssertEqual(result, .started)
     XCTAssertEqual(session.status, .overlay)

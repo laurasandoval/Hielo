@@ -17,17 +17,17 @@ public struct KeyboardPopoverShape: Shape, Sendable {
   public static let capsule = KeyboardPopoverShape(
     shape: Capsule(style: .continuous)
   ) { size in
-    .uniform(min(size.width, size.height) / 2)
+    uniformCornerRadii(min(size.width, size.height) / 2)
   }
 
   /// A circle centered in the shape's bounds.
   public static let circle = KeyboardPopoverShape(shape: Circle()) { size in
-    .uniform(min(size.width, size.height) / 2)
+    uniformCornerRadii(min(size.width, size.height) / 2)
   }
 
   /// A rectangle with square corners.
   public static let rect = KeyboardPopoverShape(shape: Rectangle()) { _ in
-    .uniform(0)
+    uniformCornerRadii(0)
   }
 
   /// A continuously rounded rectangle with a uniform corner radius.
@@ -36,7 +36,7 @@ public struct KeyboardPopoverShape: Shape, Sendable {
     return KeyboardPopoverShape(
       shape: RoundedRectangle(cornerRadius: radius, style: .continuous)
     ) { _ in
-      .uniform(radius)
+      uniformCornerRadii(radius)
     }
   }
 
@@ -61,10 +61,8 @@ public struct KeyboardPopoverShape: Shape, Sendable {
   func cornerRadii(for size: CGSize) -> RectangleCornerRadii {
     resolveCornerRadii(size)
   }
-}
 
-private extension RectangleCornerRadii {
-  static func uniform(_ radius: CGFloat) -> RectangleCornerRadii {
+  private static func uniformCornerRadii(_ radius: CGFloat) -> RectangleCornerRadii {
     RectangleCornerRadii(
       topLeading: radius,
       bottomLeading: radius,

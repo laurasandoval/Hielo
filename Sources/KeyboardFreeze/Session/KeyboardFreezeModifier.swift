@@ -19,7 +19,7 @@ extension View {
 }
 
 private struct KeyboardFreezeModifier: ViewModifier {
-  @Bindable var keyboardFreeze: KeyboardFreeze
+  let keyboardFreeze: KeyboardFreeze
   let lifecycle: KeyboardFreezeHostLifecycle
 
   func body(content: Content) -> some View {
@@ -52,11 +52,11 @@ private struct KeyboardFreezeModifier: ViewModifier {
     guard lifecycle == .cancelOnDisappear else { return }
     keyboardFreeze.cancel()
   }
-}
 
-private struct InteractionShieldButtonStyle: ButtonStyle {
-  func makeBody(configuration: Configuration) -> some View {
-    Color.clear
-      .contentShape(.rect)
+  private struct InteractionShieldButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+      Color.clear
+        .contentShape(.rect)
+    }
   }
 }

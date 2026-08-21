@@ -3,9 +3,10 @@ import SwiftUI
 
 /// Owns one frozen-keyboard presentation at a time.
 ///
-/// Create one session for the screen or navigation flow that uses it. Overlay
-/// content mounts inside the system keyboard window. Pinning moves a frozen
-/// keyboard snapshot into the caller's page while the real keyboard is hidden.
+/// Create one session for the screen or navigation flow that uses it. Overlays
+/// use the keyboard window while the keyboard is visible and the app window
+/// otherwise. Pinning moves a frozen keyboard snapshot into the caller's page
+/// while the real keyboard is hidden.
 @MainActor
 @Observable
 public final class KeyboardFreeze {
@@ -13,16 +14,6 @@ public final class KeyboardFreeze {
     public let windowBounds: CGRect
     public let keyboardFrame: CGRect
     public let sourceFrame: CGRect
-
-    public init(
-      windowBounds: CGRect,
-      keyboardFrame: CGRect,
-      sourceFrame: CGRect
-    ) {
-      self.windowBounds = windowBounds
-      self.keyboardFrame = keyboardFrame
-      self.sourceFrame = sourceFrame
-    }
   }
 
   public struct Configuration: Sendable {
@@ -45,6 +36,8 @@ public final class KeyboardFreeze {
     case restoring
     case repinning
   }
+
+  // MARK: - State
 
   public private(set) var status: Status = .idle
 
@@ -78,6 +71,8 @@ public final class KeyboardFreeze {
   @ObservationIgnored private var animationSuppressionID: UUID?
   @ObservationIgnored private var animationsWereEnabledBeforeSuppression: Bool?
 
+  // MARK: - Lifecycle
+
   public convenience init(configuration: Configuration = Configuration()) {
     self.init(
       configuration: configuration,
@@ -101,6 +96,8 @@ public final class KeyboardFreeze {
       cancel()
     }
   }
+
+  // MARK: - Overlay presentation
 
   /// Mounts custom SwiftUI content over a frozen snapshot of the keyboard.
   ///
@@ -198,6 +195,8 @@ public final class KeyboardFreeze {
     }
   }
 
+  // MARK: - Keyboard pinning
+
   /// Captures the live keyboard, mounts it in the moving page, and resigns focus.
   ///
   /// Calling this while restoration is in flight interrupts that restoration
@@ -245,6 +244,8 @@ public final class KeyboardFreeze {
     }
     return .started
   }
+
+  // MARK: - Keyboard restoration
 
   /// Restores focus behind the snapshot, then reveals the live keyboard at once.
   public func restoreKeyboard(
@@ -295,6 +296,8 @@ public final class KeyboardFreeze {
     }
   }
 
+  // MARK: - Host integration
+
   func layoutPageSnapshot(in container: UIView) {
     guard let snapshotView = pageSnapshotView, let pin = activePin else {
       for subview in container.subviews {
@@ -339,6 +342,8 @@ public final class KeyboardFreeze {
   private var pageSnapshotView: UIView? {
     activePin?.snapshotView
   }
+
+  // MARK: - Overlay internals
 
   private func presentOverlayErased(
     sourceFrame: CGRect,
@@ -454,6 +459,8 @@ public final class KeyboardFreeze {
     setStorage(.idle)
   }
 
+  // MARK: - Restoration internals
+
   private func beginRestoring(
     pin: KeyboardFreezePin,
     focusFirstResponder: @escaping @MainActor () -> Void
@@ -524,6 +531,8 @@ public final class KeyboardFreeze {
       beginRestoring(pin: pin, focusFirstResponder: pendingFocus)
     }
   }
+
+  // MARK: - Keyboard lifecycle
 
   private func installKeyboardShowObservers(
     for presentation: KeyboardFreezeRestorationPresentation
@@ -610,6 +619,8 @@ public final class KeyboardFreeze {
     self.animationsWereEnabledBeforeSuppression = nil
   }
 
+  // MARK: - Cleanup
+
   private func cancelTasksAndObservers() {
     overlayDismissalTask?.cancel()
     overlayDismissalTask = nil
@@ -643,6 +654,8 @@ public final class KeyboardFreeze {
     self.storage = storage
     status = storage.status
   }
+
+  // MARK: - Storage
 
   private enum Storage {
     case idle

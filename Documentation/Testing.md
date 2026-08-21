@@ -5,7 +5,13 @@ physical iPhone.
 
 ## Overlay
 
-- Focus the text field and open the menu.
+- With no text field focused, open both the leading and trailing menus.
+- Confirm bottom controls resolve to bottom-leading and bottom-trailing so each
+  menu grows into the available screen space.
+- Move a source to the top half of a test screen and confirm a centered vertical
+  anchor resolves to the equivalent top corner.
+- Confirm no keyboard focus is required and outside taps still dismiss.
+- Focus the text field and reopen both menus.
 - Confirm the cursor remains focused and blinking.
 - Confirm the menu is leading-aligned and vertically centered on its source.
 - Confirm the source remains centered while it blurs and fades away.

@@ -25,7 +25,7 @@ struct KeyboardPopoverSurface<SourceContent: View, PopoverContent: View>: View {
         .modifier(
           KeyboardPopoverSurfaceOpacityModifier(
             progress: expansionProgress,
-            fadeFraction: 0.25
+            fadeFraction: KeyboardPopoverMotion.surfaceFadeFraction
           )
         )
 

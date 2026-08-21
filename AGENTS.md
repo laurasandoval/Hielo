@@ -21,13 +21,21 @@ at your own risk. Preserve the fail-closed behavior when any symbol is missing.
 
 ## Project structure
 
-- `Sources/KeyboardFreeze`: the library and internal runtime
-- `Tests/KeyboardFreezeTests`: state-machine and symbol-assembly tests
+- `Sources/KeyboardFreeze/Session`: public session API and state machine
+- `Sources/KeyboardFreeze/Hosting`: app- and keyboard-window presentation hosts
+- `Sources/KeyboardFreeze/Pinning`: pinned snapshot and restoration ownership
+- `Sources/KeyboardFreeze/Popover`: morphing popover UI, placement, and motion
+- `Sources/KeyboardFreeze/Runtime`: private UIKit discovery and capture boundary
+- `Tests/KeyboardFreezeTests`: tests grouped to mirror source features
 - `Examples/KeyboardFreezeDemo`: the iOS demonstration app
 - `Documentation`: architecture and physical-device verification
 
 Use one Swift type per file. Prefer SwiftUI in the example app; UIKit is
 expected only inside the package's keyboard-window boundary.
+
+Keep popover placement, drag behavior, and motion tuning independent. The
+source's UIKit window resolution and SwiftUI screen measurement are both
+required for correct cross-window placement on physical devices.
 
 ## Verification
 
