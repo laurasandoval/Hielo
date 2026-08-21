@@ -11,6 +11,10 @@ physical iPhone.
 - Move a source to the top half of a test screen and confirm a centered vertical
   anchor resolves to the equivalent top corner.
 - Confirm no keyboard focus is required and outside taps still dismiss.
+- Present content taller than the safe area; confirm it shifts to the top safe
+  area edge while preserving its natural height.
+- Present content wider than the screen; confirm it shifts to the leading safe
+  area edge without resizing and lets the consumer's view overflow naturally.
 - Focus the text field and reopen both menus.
 - Confirm the cursor remains focused and blinking.
 - Confirm the menu is leading-aligned and vertically centered on its source.

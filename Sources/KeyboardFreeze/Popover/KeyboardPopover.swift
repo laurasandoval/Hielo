@@ -134,7 +134,7 @@ struct KeyboardPopover<SourceContent: View, PopoverContent: View>: View {
         KeyboardPopoverPlacement.adaptiveAttachmentAnchor(
           preferredAnchor: attachmentAnchor,
           sourceFrame: context.sourceFrame,
-          windowBounds: context.windowBounds
+          availableBounds: context.safeAreaBounds
         )
       } else {
         attachmentAnchor
@@ -144,7 +144,7 @@ struct KeyboardPopover<SourceContent: View, PopoverContent: View>: View {
       sourceFrame: context.sourceFrame,
       destinationSize: destinationSize,
       attachmentAnchor: resolvedAnchor,
-      windowBounds: context.windowBounds
+      availableBounds: context.safeAreaBounds
     )
   }
 

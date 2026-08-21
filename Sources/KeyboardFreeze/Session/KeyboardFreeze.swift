@@ -12,6 +12,7 @@ import SwiftUI
 public final class KeyboardFreeze {
   public struct Context: Sendable {
     public let windowBounds: CGRect
+    public let safeAreaBounds: CGRect
     public let keyboardFrame: CGRect
     public let sourceFrame: CGRect
   }
@@ -129,21 +130,23 @@ public final class KeyboardFreeze {
       return .blockedByActivePresentation(status)
     }
 
+    let sourceWindowResolution = source.resolveWindow()
     if let capture = runtime.capture() {
       return startOverlayPresentation(
         capture: capture,
         sourceFrame: sourceFrame,
+        safeAreaFrameInScreen: sourceWindowResolution?.safeAreaFrameInScreen,
         overlayFrame: overlayFrame,
         onOutsideTap: onOutsideTap,
         content: { AnyView(content($0)) }
       )
     }
 
-    guard let resolution = source.resolveWindow() else {
+    guard let sourceWindowResolution else {
       return .sourceUnavailable
     }
     return startScreenOverlayPresentation(
-      resolution: resolution,
+      resolution: sourceWindowResolution,
       overlayFrame: overlayFrame,
       onOutsideTap: onOutsideTap,
       content: { AnyView(content($0)) }
@@ -394,6 +397,7 @@ public final class KeyboardFreeze {
   private func startOverlayPresentation(
     capture: KeyboardFreezeRuntime.Capture,
     sourceFrame: CGRect,
+    safeAreaFrameInScreen: CGRect? = nil,
     overlayFrame: (Context) -> CGRect,
     onOutsideTap: (@MainActor () -> Void)?,
     content: (Context) -> AnyView
@@ -405,6 +409,9 @@ public final class KeyboardFreeze {
       }
     let context = Context(
       windowBounds: keyboardWindow.bounds,
+      safeAreaBounds: safeAreaFrameInScreen.map {
+        keyboardWindow.convert($0, from: nil)
+      } ?? keyboardWindow.bounds.inset(by: keyboardWindow.safeAreaInsets),
       keyboardFrame: capture.keyboardFrameInWindow,
       sourceFrame: keyboardWindow.convert(sourceFrame, from: nil)
     )
@@ -434,6 +441,7 @@ public final class KeyboardFreeze {
       }
     let context = Context(
       windowBounds: hostWindow.bounds,
+      safeAreaBounds: hostWindow.convert(resolution.safeAreaFrameInScreen, from: nil),
       keyboardFrame: .zero,
       sourceFrame: hostWindow.convert(resolution.frameInScreen, from: nil)
     )

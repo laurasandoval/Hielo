@@ -4,18 +4,18 @@ struct KeyboardPopoverPlacement {
   static func adaptiveAttachmentAnchor(
     preferredAnchor: UnitPoint,
     sourceFrame: CGRect,
-    windowBounds: CGRect
+    availableBounds: CGRect
   ) -> UnitPoint {
     UnitPoint(
       x: resolvedComponent(
         preferredAnchor.x,
         sourceMidpoint: sourceFrame.midX,
-        windowMidpoint: windowBounds.midX
+        availableMidpoint: availableBounds.midX
       ),
       y: resolvedComponent(
         preferredAnchor.y,
         sourceMidpoint: sourceFrame.midY,
-        windowMidpoint: windowBounds.midY
+        availableMidpoint: availableBounds.midY
       )
     )
   }
@@ -24,7 +24,7 @@ struct KeyboardPopoverPlacement {
     sourceFrame: CGRect,
     destinationSize: CGSize,
     attachmentAnchor: UnitPoint,
-    windowBounds: CGRect
+    availableBounds: CGRect
   ) -> CGRect {
     let attachment = CGPoint(
       x: sourceFrame.minX + sourceFrame.width * attachmentAnchor.x,
@@ -34,13 +34,17 @@ struct KeyboardPopoverPlacement {
       x: attachment.x - destinationSize.width * attachmentAnchor.x,
       y: attachment.y - destinationSize.height * attachmentAnchor.y
     )
-    let maximumOrigin = CGPoint(
-      x: max(windowBounds.minX, windowBounds.maxX - destinationSize.width),
-      y: max(windowBounds.minY, windowBounds.maxY - destinationSize.height)
-    )
     let origin = CGPoint(
-      x: min(max(proposedOrigin.x, windowBounds.minX), maximumOrigin.x),
-      y: min(max(proposedOrigin.y, windowBounds.minY), maximumOrigin.y)
+      x: constrainedOrigin(
+        proposedOrigin.x,
+        length: destinationSize.width,
+        availableRange: availableBounds.minX...availableBounds.maxX
+      ),
+      y: constrainedOrigin(
+        proposedOrigin.y,
+        length: destinationSize.height,
+        availableRange: availableBounds.minY...availableBounds.maxY
+      )
     )
 
     return CGRect(origin: origin, size: destinationSize)
@@ -49,11 +53,26 @@ struct KeyboardPopoverPlacement {
   private static func resolvedComponent(
     _ preferredComponent: Double,
     sourceMidpoint: Double,
-    windowMidpoint: Double
+    availableMidpoint: Double
   ) -> Double {
     guard abs(preferredComponent - 0.5) < 0.001 else {
       return preferredComponent
     }
-    return sourceMidpoint <= windowMidpoint ? 0 : 1
+    return sourceMidpoint <= availableMidpoint ? 0 : 1
+  }
+
+  private static func constrainedOrigin(
+    _ proposedOrigin: Double,
+    length: Double,
+    availableRange: ClosedRange<Double>
+  ) -> Double {
+    let maximumOrigin = max(
+      availableRange.lowerBound,
+      availableRange.upperBound - length
+    )
+    return min(
+      max(proposedOrigin, availableRange.lowerBound),
+      maximumOrigin
+    )
   }
 }

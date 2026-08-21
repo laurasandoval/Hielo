@@ -7,6 +7,7 @@ import UIKit
 public final class KeyboardFreezeSource {
   struct WindowResolution {
     let frameInScreen: CGRect
+    let safeAreaFrameInScreen: CGRect
     let window: UIWindow
   }
 
@@ -24,7 +25,15 @@ public final class KeyboardFreezeSource {
 
   func resolveWindow() -> WindowResolution? {
     guard let frameInScreen, let window = owner?.window else { return nil }
-    return WindowResolution(frameInScreen: frameInScreen, window: window)
+    let safeAreaFrameInScreen = window.convert(
+      window.bounds.inset(by: window.safeAreaInsets),
+      to: nil
+    )
+    return WindowResolution(
+      frameInScreen: frameInScreen,
+      safeAreaFrameInScreen: safeAreaFrameInScreen,
+      window: window
+    )
   }
 
   func update(frameInScreen: CGRect, screen: UIScreen, owner: UIView) {

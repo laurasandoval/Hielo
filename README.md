@@ -107,6 +107,11 @@ custom unit points, remain supported. The real text input stays focused when
 one is active. Taps outside dismiss the popover, and the expanded surface can be
 dragged in any direction. Only a downward release dismisses it.
 
+When expanded content would cross an edge, the popover translates into the
+available safe area without changing its natural size. Content larger than the
+safe area pins to its leading or top edge. KeyboardFreeze never resizes the
+consumer's view to prevent overflow.
+
 For fully custom presentations, `presentOverlay` and `KeyboardFreezeSource`
 remain available as lower-level APIs.
 
