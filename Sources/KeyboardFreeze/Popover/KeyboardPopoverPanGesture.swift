@@ -93,6 +93,14 @@ struct KeyboardPopoverPanGesture: UIGestureRecognizerRepresentable {
       )
     }
 
+    func gestureRecognizer(
+      _ gestureRecognizer: UIGestureRecognizer,
+      shouldBeRequiredToFailBy otherGestureRecognizer: UIGestureRecognizer
+    ) -> Bool {
+      guard gestureRecognizer is UIPanGestureRecognizer else { return false }
+      return otherGestureRecognizer === touchedScrollView?.panGestureRecognizer
+    }
+
     private func enclosingScrollView(for view: UIView?) -> UIScrollView? {
       var candidate = view
       while let view = candidate {
