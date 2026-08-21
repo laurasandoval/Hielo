@@ -7,7 +7,7 @@ struct KeyboardPopoverOverlay<SourceContent: View, PopoverContent: View>: View {
   let popoverContent: PopoverContent
   let sourceFrame: CGRect
   let destinationFrame: CGRect
-  let cornerRadii: KeyboardPopoverCornerRadii
+  let shapeTransition: KeyboardPopoverShapeTransition
   let onSourceHandoff: @MainActor () -> Void
   let onDismissed: @MainActor () -> Void
 
@@ -44,14 +44,14 @@ struct KeyboardPopoverOverlay<SourceContent: View, PopoverContent: View>: View {
         width: currentSurfaceFrame.width,
         height: currentSurfaceFrame.height
       )
-      .clipShape(.rect(cornerRadius: cornerRadius))
+      .clipShape(surfaceShape)
       .glassEffect(
         .regular.interactive(),
-        in: .rect(cornerRadius: cornerRadius)
+        in: surfaceShape
       )
       .scaleEffect(dragScale)
       .offset(dragOffset)
-      .contentShape(.rect(cornerRadius: cornerRadius))
+      .contentShape(surfaceShape)
       .simultaneousGesture(dragGesture)
       .position(surfaceCenter)
     }
@@ -97,8 +97,8 @@ struct KeyboardPopoverOverlay<SourceContent: View, PopoverContent: View>: View {
     min(max(1 + expansionProgress * 0.5, 1), 1.5)
   }
 
-  private var cornerRadius: Double {
-    cornerRadii.resolve(
+  private var surfaceShape: UnevenRoundedRectangle {
+    shapeTransition.resolveShape(
       sourceSize: localSourceFrame.size,
       destinationSize: destinationFrame.size,
       expansionProgress: expansionProgress

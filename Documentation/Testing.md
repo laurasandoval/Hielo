@@ -10,6 +10,10 @@ physical iPhone.
 - Confirm the menu is leading-aligned and vertically centered on its source.
 - Confirm the source remains centered while it blurs and fades away.
 - Confirm expanded content scales from its center without relayout or blur.
+- Repeat with custom source and popover shapes; confirm all corners animate
+  continuously and finish at the requested geometry.
+- Repeat with `sourceGlass: nil`; confirm the resting source has no package-
+  supplied glass and the expanded popover remains Liquid Glass.
 - On dismissal, confirm the source glass appears in place without morphing from
   a neighboring glass element.
 - Drag left, right, and up; confirm resistance keeps the menu near its anchor

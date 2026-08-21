@@ -18,7 +18,9 @@ struct ComposerView: View {
           .buttonStyle(.plain)
           .keyboardPopover(
             isPresented: $isMenuPresented,
-            attachmentAnchor: .leading
+            attachmentAnchor: .leading,
+            sourceShape: .capsule,
+            popoverShape: .rect(cornerRadius: 32)
           ) {
             Text("Hello World")
               .font(.headline)

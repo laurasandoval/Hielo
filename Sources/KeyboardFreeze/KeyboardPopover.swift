@@ -2,7 +2,7 @@ import SwiftUI
 
 /// A source view that expands into custom content over a frozen keyboard.
 ///
-/// Create this view with ``View/keyboardPopover(isPresented:attachmentAnchor:content:)``.
+/// Create this view with a `keyboardPopover` view modifier.
 /// The nearest ``View/keyboardFreeze(_:lifecycle:)`` modifier supplies the
 /// keyboard-freeze session used for presentation.
 @MainActor
@@ -10,7 +10,8 @@ public struct KeyboardPopover<SourceContent: View, PopoverContent: View>: View {
   @Binding private var isPresented: Bool
 
   private let attachmentAnchor: UnitPoint
-  private let cornerRadii = KeyboardPopoverCornerRadii.standard
+  private let sourceGlass: Glass?
+  private let shapeTransition: KeyboardPopoverShapeTransition
   private let sourceContent: SourceContent
   private let popoverContent: PopoverContent
 
@@ -23,11 +24,19 @@ public struct KeyboardPopover<SourceContent: View, PopoverContent: View>: View {
   public init(
     isPresented: Binding<Bool>,
     attachmentAnchor: UnitPoint = .leading,
+    sourceGlass: Glass? = .regular.interactive(),
+    sourceShape: KeyboardPopoverShape = .capsule,
+    popoverShape: KeyboardPopoverShape = .rect(cornerRadius: 32),
     @ViewBuilder source: () -> SourceContent,
     @ViewBuilder content: () -> PopoverContent
   ) {
     _isPresented = isPresented
     self.attachmentAnchor = attachmentAnchor
+    self.sourceGlass = sourceGlass
+    shapeTransition = KeyboardPopoverShapeTransition(
+      sourceShape: sourceShape,
+      popoverShape: popoverShape
+    )
     sourceContent = source()
     popoverContent = content()
   }
@@ -39,7 +48,10 @@ public struct KeyboardPopover<SourceContent: View, PopoverContent: View>: View {
           .frame(width: sourceSize.width, height: sourceSize.height)
       } else {
         sourceContent
-          .glassEffect(.regular.interactive(), in: cornerRadii.collapsed.shape)
+          .glassEffect(
+            sourceGlass ?? .identity,
+            in: shapeTransition.sourceShape
+          )
           .glassEffectTransition(.identity)
       }
     }
@@ -93,7 +105,7 @@ public struct KeyboardPopover<SourceContent: View, PopoverContent: View>: View {
           popoverContent: popoverContent,
           sourceFrame: context.sourceFrame,
           destinationFrame: destinationFrame(context),
-          cornerRadii: cornerRadii,
+          shapeTransition: shapeTransition,
           onSourceHandoff: prepareSourceHandoff,
           onDismissed: finishDismissal
         )

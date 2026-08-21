@@ -68,6 +68,36 @@ The modifier supplies the Liquid Glass surface. Both the source and expanded
 content can contain any SwiftUI view. Expanded content can hug its content or
 set a fixed size with `frame`; no package-specific sizing style is required.
 
+The default transition expands from a capsule into a continuously rounded
+rectangle with a 32-point corner radius. Customize both ends with familiar
+SwiftUI-style shapes:
+
+```swift
+.keyboardPopover(
+  isPresented: $isMenuPresented,
+  sourceShape: .rect(cornerRadius: 12),
+  popoverShape: .rect(cornerRadius: 24)
+) {
+  SettingsView()
+    .frame(width: 280, height: 320)
+}
+```
+
+For a source that already owns its appearance, including a non-glass source,
+pass `sourceGlass: nil`. The expanded popover remains Liquid Glass:
+
+```swift
+.keyboardPopover(
+  isPresented: $isMenuPresented,
+  sourceGlass: nil,
+  sourceShape: .circle,
+  popoverShape: .rect(cornerRadius: 28)
+) {
+  ProfileActions()
+    .frame(width: 240, height: 280)
+}
+```
+
 `.leading` means leading-center. Standard `UnitPoint` values such as `.top`,
 `.bottomTrailing`, and `.center`, as well as custom unit points, are also
 supported. The real text input stays focused. Taps outside dismiss the popover,

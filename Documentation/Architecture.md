@@ -23,10 +23,10 @@ layout.
 `KeyboardPopover` builds on this boundary. Its source view measures itself and
 the expanded content with ordinary SwiftUI layout, then aligns matching
 `UnitPoint` anchors. One normalized expansion value drives surface size,
-corner radius, source blur and opacity, and the expanded content's center-based
-visual scale. Both content layers remain centered in the changing surface. The
-expanded content keeps its final layout throughout the transition and is
-clipped by the changing glass surface.
+continuous per-corner interpolation, source blur and opacity, and the expanded
+content's center-based visual scale. Both content layers remain centered in the
+changing surface. The expanded content keeps its final layout throughout the
+transition and is clipped by the changing glass surface.
 
 The app-side source uses an identity glass transition. The custom overlay
 finishes its collapse before the source is restored, so a surrounding

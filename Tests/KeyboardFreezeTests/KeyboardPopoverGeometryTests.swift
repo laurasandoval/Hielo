@@ -4,39 +4,89 @@ import XCTest
 @testable import KeyboardFreeze
 
 final class KeyboardPopoverGeometryTests: XCTestCase {
-  func testStandardCornerRadiiInterpolateBetweenFlexibleSizes() {
-    let radii = KeyboardPopoverCornerRadii.standard
+  @MainActor
+  func testModifierAcceptsNonGlassSourceAndShapes() {
+    _ = Text("Source")
+      .keyboardPopover(
+        isPresented: .constant(false),
+        sourceGlass: nil,
+        sourceShape: .circle,
+        popoverShape: .rect(cornerRadius: 28)
+      ) {
+        Text("Popover")
+      }
+  }
+
+  func testStandardShapesInterpolateBetweenFlexibleSizes() {
+    let transition = KeyboardPopoverShapeTransition.standard
 
     XCTAssertEqual(
-      radii.resolve(
+      transition.resolve(
         sourceSize: CGSize(width: 48, height: 48),
         destinationSize: CGSize(width: 250, height: 250),
         expansionProgress: 0
       ),
-      24
+      RectangleCornerRadii(
+        topLeading: 24,
+        bottomLeading: 24,
+        bottomTrailing: 24,
+        topTrailing: 24
+      )
     )
     XCTAssertEqual(
-      radii.resolve(
+      transition.resolve(
         sourceSize: CGSize(width: 48, height: 48),
         destinationSize: CGSize(width: 250, height: 250),
         expansionProgress: 0.5
       ),
-      28
+      RectangleCornerRadii(
+        topLeading: 28,
+        bottomLeading: 28,
+        bottomTrailing: 28,
+        topTrailing: 28
+      )
     )
     XCTAssertEqual(
-      radii.resolve(
+      transition.resolve(
         sourceSize: CGSize(width: 48, height: 48),
         destinationSize: CGSize(width: 250, height: 250),
         expansionProgress: 1
       ),
-      32
+      RectangleCornerRadii(
+        topLeading: 32,
+        bottomLeading: 32,
+        bottomTrailing: 32,
+        topTrailing: 32
+      )
     )
   }
 
-  func testFixedCornerRadiusClampsToSurfaceSize() {
-    let radius = KeyboardPopoverCornerRadii.Radius.fixed(32)
+  func testCustomShapesInterpolateEveryCorner() {
+    let transition = KeyboardPopoverShapeTransition(
+      sourceShape: .rect(cornerRadius: 8),
+      popoverShape: .rect(
+        cornerRadii: RectangleCornerRadii(
+          topLeading: 32,
+          bottomLeading: 24,
+          bottomTrailing: 16,
+          topTrailing: 8
+        )
+      )
+    )
 
-    XCTAssertEqual(radius.resolve(for: CGSize(width: 40, height: 20)), 10)
+    XCTAssertEqual(
+      transition.resolve(
+        sourceSize: CGSize(width: 48, height: 48),
+        destinationSize: CGSize(width: 250, height: 250),
+        expansionProgress: 0.5
+      ),
+      RectangleCornerRadii(
+        topLeading: 20,
+        bottomLeading: 16,
+        bottomTrailing: 12,
+        topTrailing: 8
+      )
+    )
   }
 
   func testLeadingAttachmentKeepsLeadingEdgeAndVerticalCenter() {
