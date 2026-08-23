@@ -26,6 +26,10 @@ Session/source types are internal. Keyboard pinning, restoration, and explicit
 session control are preserved on `laurasandoval--keyboard-pinning`; do not
 reintroduce them to main without an explicit scope change.
 
+The `laurasandoval--popover-submenus` branch adds experimental content transitions,
+content-driven placement, corner radii, and drag dismissal configuration. Keep
+these additions compatible with main’s presentation ownership and cleanup.
+
 ## API and maintainability
 
 - Follow SwiftUI and UIKit conventions: native types, bindings, environment-based

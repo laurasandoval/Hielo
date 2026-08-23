@@ -174,3 +174,26 @@ popover modifier or on an ancestor to customize opening, dismissal, and drag
 snap-back. The default is `.spring(duration: 0.3, bounce: 0.2)`. Pass `nil` to
 disable animation. The choice is captured at presentation time; Reduce Motion
 also disables transitions. Supply a finite animation so dismissal can complete.
+
+## Experimental submenus
+
+This branch adds content-driven expansion to the popover API. Use
+`HieloPopoverContentTransition(isExpanded:collapsed:expanded:)` to coordinate
+scaling and fading between two content views. Each view supplies its natural
+size with ordinary SwiftUI layout. The ChatGPT demo shows this integration.
+
+Apply these modifiers inside the popover content to change its presentation:
+
+```swift
+DetailView()
+  .containerRelativeFrame(.horizontal) { width, _ in width - 16 }
+  .frame(height: 585)
+  .hieloPopoverCornerRadius(.containerConcentric)
+  .hieloPopoverPlacement(.container(.bottom, inset: 8))
+  .hieloPopoverDragDismissDisabled()
+```
+
+The default placement is `.source`. Without a content-level corner radius, the
+source modifier’s `popoverShape` applies. Disabling drag dismissal leaves outside
+taps, accessibility escape, and binding-driven dismissal available. Submenu
+resizing uses the same `.hieloPopoverAnimation(...)` setting as presentation.

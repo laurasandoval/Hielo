@@ -8,6 +8,8 @@ extension HieloSession {
     from source: HieloSource,
     sourceFrame: CGRect,
     overlayFrame: (Context) -> CGRect,
+    interactionRegion: HieloOverlayInteractionRegion? = nil,
+    cornerRadiusResolver: HieloPopoverCornerRadiusResolver? = nil,
     onOutsideTap: (@MainActor () -> Void)? = nil,
     @ViewBuilder content: (Context) -> Content
   ) -> HieloActivationResult {
@@ -25,6 +27,8 @@ extension HieloSession {
         sourceFrame: sourceFrame,
         safeAreaFrameInScreen: sourceWindowResolution?.safeAreaFrameInScreen,
         overlayFrame: overlayFrame,
+        interactionRegion: interactionRegion,
+        cornerRadiusResolver: cornerRadiusResolver,
         onOutsideTap: onOutsideTap,
         content: { AnyView(content($0)) }
       )
@@ -38,6 +42,8 @@ extension HieloSession {
       onEnded: onEnded,
       resolution: sourceWindowResolution,
       overlayFrame: overlayFrame,
+      interactionRegion: interactionRegion,
+      cornerRadiusResolver: cornerRadiusResolver,
       onOutsideTap: onOutsideTap,
       content: { AnyView(content($0)) }
     )
@@ -51,6 +57,8 @@ extension HieloSession {
     sourceFrame: CGRect,
     safeAreaFrameInScreen: CGRect? = nil,
     overlayFrame: (Context) -> CGRect,
+    interactionRegion: HieloOverlayInteractionRegion? = nil,
+    cornerRadiusResolver: HieloPopoverCornerRadiusResolver? = nil,
     onOutsideTap: (@MainActor () -> Void)?,
     content: (Context) -> AnyView
   ) -> HieloActivationResult {
@@ -68,6 +76,7 @@ extension HieloSession {
       sourceFrame: keyboardWindow.convert(sourceFrame, from: nil)
     )
     runtime.pauseSnapshot(capture.snapshotView)
+    cornerRadiusResolver?.connect(to: keyboardWindow)
     let presentation = HieloOverlayPresentation(
       id: id,
       onEnded: onEnded,
@@ -78,6 +87,7 @@ extension HieloSession {
       backgroundView: capture.snapshotView,
       backgroundFrame: context.keyboardFrame,
       overlayFrame: overlayFrame(context),
+      interactionRegion: interactionRegion,
       onOutsideTap: outsideTapAction,
       content: content(context)
     )
@@ -90,6 +100,8 @@ extension HieloSession {
     onEnded: (@MainActor () -> Void)? = nil,
     resolution: HieloSource.WindowResolution,
     overlayFrame: (Context) -> CGRect,
+    interactionRegion: HieloOverlayInteractionRegion? = nil,
+    cornerRadiusResolver: HieloPopoverCornerRadiusResolver? = nil,
     onOutsideTap: (@MainActor () -> Void)?,
     content: (Context) -> AnyView
   ) -> HieloActivationResult {
@@ -104,11 +116,13 @@ extension HieloSession {
       keyboardFrame: .zero,
       sourceFrame: hostWindow.convert(resolution.frameInScreen, from: nil)
     )
+    cornerRadiusResolver?.connect(to: hostWindow)
     let presentation = HieloOverlayPresentation(
       id: id,
       onEnded: onEnded,
       hostWindow: hostWindow,
       overlayFrame: overlayFrame(context),
+      interactionRegion: interactionRegion,
       onOutsideTap: outsideTapAction,
       content: content(context)
     )

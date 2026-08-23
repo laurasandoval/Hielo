@@ -4,11 +4,23 @@ struct HieloPopoverExpandedLayer<Content: View>: View {
   let content: Content
   let destinationSize: CGSize
   let containerSize: CGSize
+  let surfaceCornerRadius: CGFloat
   let opacity: Double
+  let scalesTransitionContent: Bool
+  let rendersTransitionSurfaces: Bool
   let onSizeChange: (CGSize) -> Void
 
   var body: some View {
     content
+      .modifier(
+        HieloPopoverContentGeometryEnvironmentModifier(
+          surfaceSize: containerSize,
+          surfaceCornerRadius: surfaceCornerRadius,
+          isEnabled: scalesTransitionContent,
+          rendersSurfaceGlass: rendersTransitionSurfaces
+        )
+      )
+      .geometryGroup()
       .fixedSize()
       .onGeometryChange(for: CGSize.self) { $0.size } action: { onSizeChange($0) }
       .frame(width: destinationSize.width, height: destinationSize.height)
@@ -21,6 +33,7 @@ struct HieloPopoverExpandedLayer<Content: View>: View {
   }
 
   private var contentScale: Double {
+    guard !scalesTransitionContent else { return 1 }
     guard destinationSize.width > 0 else { return 1 }
     return containerSize.width / destinationSize.width
   }

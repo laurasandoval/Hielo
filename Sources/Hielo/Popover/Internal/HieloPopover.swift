@@ -21,6 +21,8 @@ struct HieloPopover<SourceContent: View, PopoverContent: View>: View {
   @State private var source = HieloSource()
   @State private var sourceFrameInScreen = CGRect.zero
   @State private var presentationID: UUID?
+  @State private var interactionRegion = HieloOverlayInteractionRegion()
+  @State private var cornerRadiusResolver = HieloPopoverCornerRadiusResolver()
 
   @State private var presentationTask: Task<Void, Never>?
 
@@ -114,7 +116,9 @@ struct HieloPopover<SourceContent: View, PopoverContent: View>: View {
       onEnded: { presentationEnded(id: id) },
       from: source,
       sourceFrame: sourceFrameInScreen,
-      overlayFrame: { $0.sourceFrame },
+      overlayFrame: { $0.windowBounds },
+      interactionRegion: interactionRegion,
+      cornerRadiusResolver: cornerRadiusResolver,
       onOutsideTap: requestDismissal,
       content: { context in
         HieloPopoverOverlay(
@@ -126,7 +130,8 @@ struct HieloPopover<SourceContent: View, PopoverContent: View>: View {
           shapeTransition: shapeTransition,
           fadesSurface: sourceGlass == nil,
           animation: animation,
-          onFrameChange: { session.updateOverlayFrame($0, id: id) },
+          interactionRegion: interactionRegion,
+          cornerRadiusResolver: cornerRadiusResolver,
           onDismissed: { session.dismissOverlay(id: id) }
         )
         .environment(\.self, environment)

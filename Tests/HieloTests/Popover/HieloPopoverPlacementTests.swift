@@ -7,7 +7,7 @@ final class HieloPopoverPlacementTests: XCTestCase {
   func testLeadingAttachmentKeepsLeadingEdgeAndVerticalCenter() {
     let source = CGRect(x: 28, y: 560, width: 48, height: 48)
 
-    let destination = HieloPopoverPlacement.destinationFrame(
+    let destination = HieloPopoverPlacementResolver.sourceDestinationFrame(
       sourceFrame: source,
       destinationSize: CGSize(width: 250, height: 250),
       attachmentAnchor: .leading,
@@ -19,7 +19,7 @@ final class HieloPopoverPlacementTests: XCTestCase {
   }
 
   func testAdaptiveLeadingAnchorUsesBottomLeadingForBottomSource() {
-    let anchor = HieloPopoverPlacement.adaptiveAttachmentAnchor(
+    let anchor = HieloPopoverPlacementResolver.adaptiveAttachmentAnchor(
       preferredAnchor: .leading,
       sourceFrame: CGRect(x: 28, y: 760, width: 48, height: 48),
       availableBounds: CGRect(x: 0, y: 0, width: 390, height: 844)
@@ -29,7 +29,7 @@ final class HieloPopoverPlacementTests: XCTestCase {
   }
 
   func testAdaptiveTrailingAnchorUsesTopTrailingForTopSource() {
-    let anchor = HieloPopoverPlacement.adaptiveAttachmentAnchor(
+    let anchor = HieloPopoverPlacementResolver.adaptiveAttachmentAnchor(
       preferredAnchor: .trailing,
       sourceFrame: CGRect(x: 314, y: 60, width: 48, height: 48),
       availableBounds: CGRect(x: 0, y: 0, width: 390, height: 844)
@@ -39,7 +39,7 @@ final class HieloPopoverPlacementTests: XCTestCase {
   }
 
   func testAdaptiveAnchorPreservesExplicitCorner() {
-    let anchor = HieloPopoverPlacement.adaptiveAttachmentAnchor(
+    let anchor = HieloPopoverPlacementResolver.adaptiveAttachmentAnchor(
       preferredAnchor: .topLeading,
       sourceFrame: CGRect(x: 314, y: 760, width: 48, height: 48),
       availableBounds: CGRect(x: 0, y: 0, width: 390, height: 844)
@@ -51,7 +51,7 @@ final class HieloPopoverPlacementTests: XCTestCase {
   func testBottomTrailingAttachmentUsesTheMatchingSourceCorner() {
     let source = CGRect(x: 300, y: 500, width: 48, height: 48)
 
-    let destination = HieloPopoverPlacement.destinationFrame(
+    let destination = HieloPopoverPlacementResolver.sourceDestinationFrame(
       sourceFrame: source,
       destinationSize: CGSize(width: 200, height: 180),
       attachmentAnchor: .bottomTrailing,
@@ -63,7 +63,7 @@ final class HieloPopoverPlacementTests: XCTestCase {
   }
 
   func testDestinationStaysInsideAvailableBounds() {
-    let destination = HieloPopoverPlacement.destinationFrame(
+    let destination = HieloPopoverPlacementResolver.sourceDestinationFrame(
       sourceFrame: CGRect(x: 370, y: 830, width: 20, height: 14),
       destinationSize: CGSize(width: 250, height: 250),
       attachmentAnchor: .topLeading,
@@ -127,7 +127,7 @@ final class HieloPopoverPlacementTests: XCTestCase {
       ]
 
     for snapshot in snapshots {
-      let result = HieloPopoverPlacement.destinationFrame(
+      let result = HieloPopoverPlacementResolver.sourceDestinationFrame(
         sourceFrame: snapshot.source,
         destinationSize: snapshot.destinationSize,
         attachmentAnchor: snapshot.anchor,

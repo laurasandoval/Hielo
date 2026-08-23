@@ -31,9 +31,7 @@ struct ChatGPTDemoView: View {
             attachmentAnchor: .leading,
             popoverShape: .rect(cornerRadius: 45)
           ) {
-            ChatGPTDemoMenu {
-              isMenuPresented = false
-            }
+            ChatGPTDemoMenu()
           }
           .hieloPopoverStyle(.plain)
         })

@@ -32,9 +32,11 @@ separate because keyboard and app windows can use different coordinate spaces.
 The session converts source geometry into the host window's coordinates.
 
 Expanded content mounts only inside the presentation host. Its intrinsic SwiftUI
-size updates the host frame and starts expansion; there is no hidden second
-content tree in the source page. The initial host uses the source frame so
-outside taps remain available even while content is empty or loading. Placement
+size updates the surface frame and starts expansion; there is no hidden second
+content tree in the source page. The SwiftUI host fills the window to support
+container-relative submenu layout. A separate interaction region follows the
+visible surface, so outside taps remain available during resizing and while
+content is empty or loading. Placement
 aligns matching `UnitPoint` anchors. One normalized expansion value drives surface size,
 continuous per-corner interpolation, source blur and opacity, and the expanded
 content's center-based visual scale. Both content layers remain centered in the
@@ -89,3 +91,12 @@ never call private UIKit APIs.
 Private runtime checks are best-effort compatibility guards. A missing class or
 selector can be handled, but its presence cannot prove that a future OS preserves
 the private implementation's contract. Physical-device checks remain necessary.
+
+## Experimental submenus
+
+`HieloPopoverContentTransition` mounts one collapsed and one expanded child
+inside the single presentation tree. A custom layout reports the active child’s
+natural size. Animated surface geometry drives their scale and crossfade.
+Content preferences request placement, corner radius, and drag dismissal policy;
+the overlay coalesces those changes with size updates before animating. The
+configured popover animation and Reduce Motion apply to submenu resizing too.

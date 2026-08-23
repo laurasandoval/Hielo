@@ -64,3 +64,13 @@ Missing keyboard runtime support should fall back to the app-window presentation
 A missing source/host should reset the binding without leaving an interaction shield.
 Existing private symbols may still have incompatible implementations on a new OS;
 the symbol checks alone cannot rule out a runtime crash.
+
+## Experimental submenus
+
+- Open Camera, Photos, and Files with and without keyboard focus.
+- Confirm expansion to the window minus 8 points per side, bottom placement,
+  concentric corners, and coordinated content scaling and fading.
+- Collapse with Back, then dismiss and reopen; verify content state resets.
+- Confirm drag dismissal is disabled in the expanded state and outside taps
+  still dismiss, including taps on navigation controls.
+- Repeat with a custom popover animation, no animation, and Reduce Motion.

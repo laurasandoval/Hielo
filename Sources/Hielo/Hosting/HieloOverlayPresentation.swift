@@ -7,6 +7,7 @@ final class HieloOverlayPresentation: NSObject, UIGestureRecognizerDelegate {
   private let onOutsideTap: @MainActor () -> Void
   private let presentationView: HieloPresentationView
   private var appInteractionShield: UIControl?
+  private let interactionRegion: HieloOverlayInteractionRegion?
   private let hostingController: UIHostingController<AnyView>
 
   init(
@@ -17,9 +18,11 @@ final class HieloOverlayPresentation: NSObject, UIGestureRecognizerDelegate {
     backgroundView: UIView? = nil,
     backgroundFrame: CGRect = .zero,
     overlayFrame: CGRect,
+    interactionRegion: HieloOverlayInteractionRegion? = nil,
     onOutsideTap: @escaping @MainActor () -> Void,
     content: AnyView
   ) {
+    self.interactionRegion = interactionRegion
     self.id = id
     self.onEnded = onEnded
     self.onOutsideTap = onOutsideTap
@@ -78,6 +81,10 @@ final class HieloOverlayPresentation: NSObject, UIGestureRecognizerDelegate {
     _: UIGestureRecognizer,
     shouldReceive touch: UITouch
   ) -> Bool {
+    if let interactionRegion {
+      let location = touch.location(in: presentationView)
+      return !interactionRegion.frame.contains(location)
+    }
     let location = touch.location(in: hostingController.view)
     return !hostingController.view.point(inside: location, with: nil)
   }

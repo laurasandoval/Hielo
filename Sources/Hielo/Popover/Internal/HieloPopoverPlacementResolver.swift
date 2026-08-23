@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct HieloPopoverPlacement {
+struct HieloPopoverPlacementResolver {
   static func adaptiveAttachmentAnchor(
     preferredAnchor: UnitPoint,
     sourceFrame: CGRect,
@@ -20,7 +20,7 @@ struct HieloPopoverPlacement {
     )
   }
 
-  static func destinationFrame(
+  static func sourceDestinationFrame(
     sourceFrame: CGRect,
     destinationSize: CGSize,
     attachmentAnchor: UnitPoint,
@@ -48,6 +48,21 @@ struct HieloPopoverPlacement {
     )
 
     return CGRect(origin: origin, size: destinationSize)
+  }
+
+  static func containerDestinationFrame(
+    destinationSize: CGSize,
+    alignment: UnitPoint,
+    inset: CGFloat,
+    containerBounds: CGRect
+  ) -> CGRect {
+    let bounds = containerBounds.insetBy(dx: max(inset, 0), dy: max(inset, 0))
+    return CGRect(
+      x: bounds.minX + (bounds.width - destinationSize.width) * alignment.x,
+      y: bounds.minY + (bounds.height - destinationSize.height) * alignment.y,
+      width: destinationSize.width,
+      height: destinationSize.height
+    )
   }
 
   private static func resolvedComponent(
