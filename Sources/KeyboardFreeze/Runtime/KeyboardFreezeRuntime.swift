@@ -58,7 +58,7 @@ enum KeyboardFreezeRuntime {
       .filter { $0.activationState == .foregroundActive }
 
     for scene in activeScenes {
-      if let remoteKeyboardWindow = remoteKeyboardWindow(for: scene.screen) {
+      if let remoteKeyboardWindow = keyboardWindow(for: scene) {
         return remoteKeyboardWindow
       }
     }
@@ -80,8 +80,12 @@ enum KeyboardFreezeRuntime {
 
   static func keyboardWindows(on screen: UIScreen) -> [UIWindow] {
     var windows: [UIWindow] = []
-    if let remoteKeyboardWindow = remoteKeyboardWindow(for: screen) {
-      windows.append(remoteKeyboardWindow)
+    for scene in UIApplication.shared.connectedScenes.compactMap({ $0 as? UIWindowScene }) {
+      guard let window = keyboardWindow(for: scene),
+        scene.screen === screen || window.screen === screen,
+        !windows.contains(where: { $0 === window })
+      else { continue }
+      windows.append(window)
     }
 
     let keyboardWindowClasses = [
@@ -162,8 +166,12 @@ enum KeyboardFreezeRuntime {
     assembled(["Window", "Keyboard", "Remote", "UI"])
   }
 
-  static var remoteKeyboardWindowSelectorName: String {
-    assembled(["create:", "Screen:", "For", "Window", "Keyboard", "remote"])
+  static var keyboardSceneDelegateSelectorName: String {
+    assembled(["Delegate", "Scene", "keyboard"])
+  }
+
+  static var keyboardWindowSelectorName: String {
+    assembled(["Window", "keyboard"])
   }
 
   static var inputSetHostViewClassName: String {
@@ -190,31 +198,19 @@ enum KeyboardFreezeRuntime {
     components.reversed().joined()
   }
 
-  private static func remoteKeyboardWindow(for screen: UIScreen) -> UIWindow? {
-    guard
-      let remoteKeyboardWindowClass = NSClassFromString(
-        remoteKeyboardWindowClassName
-      )
-    else { return nil }
+  // The screen-based factory traps for clients linked against the iOS 27 SDK.
+  static func keyboardWindow(for scene: NSObject) -> UIWindow? {
+    guard let delegate = objectValue(
+      for: NSSelectorFromString(keyboardSceneDelegateSelectorName), on: scene
+    ) else { return nil }
+    return objectValue(
+      for: NSSelectorFromString(keyboardWindowSelectorName), on: delegate
+    ) as? UIWindow
+  }
 
-    let selector = NSSelectorFromString(remoteKeyboardWindowSelectorName)
-    typealias RemoteKeyboardWindowFactory =
-      @convention(c) (
-        AnyClass,
-        Selector,
-        UIScreen,
-        Bool
-      ) -> Unmanaged<AnyObject>?
-    guard
-      let factory = classMethod(
-        selector,
-        on: remoteKeyboardWindowClass,
-        signature: RemoteKeyboardWindowFactory.self
-      )
-    else { return nil }
-
-    return factory(remoteKeyboardWindowClass, selector, screen, false)?
-      .takeUnretainedValue() as? UIWindow
+  private static func objectValue(for selector: Selector, on object: NSObject) -> NSObject? {
+    guard object.responds(to: selector) else { return nil }
+    return object.perform(selector)?.takeUnretainedValue() as? NSObject
   }
 
   private static func firstDescendant(

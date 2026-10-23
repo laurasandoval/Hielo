@@ -10,8 +10,8 @@ final class KeyboardFreezeRuntimeTests: XCTestCase {
       "UIRemoteKeyboardWindow"
     )
     XCTAssertEqual(
-      KeyboardFreezeRuntime.remoteKeyboardWindowSelectorName,
-      "remoteKeyboardWindowForScreen:create:"
+      KeyboardFreezeRuntime.keyboardSceneDelegateSelectorName,
+      "keyboardSceneDelegate"
     )
     XCTAssertEqual(
       KeyboardFreezeRuntime.inputSetHostViewClassName,
