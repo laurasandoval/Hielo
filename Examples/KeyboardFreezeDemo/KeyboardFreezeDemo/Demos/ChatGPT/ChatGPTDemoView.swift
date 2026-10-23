@@ -36,7 +36,7 @@ struct ChatGPTDemoView: View {
           }
           .keyboardPopoverStyle(.plain)
         })
-        .padding(inputIsFocused ? 16 : 28)
+        .padding(inputIsFocused ? 16 : 38)
         .animation(.smooth(duration: 0.2), value: inputIsFocused)
       }
     }
