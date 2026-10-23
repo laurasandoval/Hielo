@@ -1,8 +1,10 @@
-/// Controls who tears down a keyboard freeze session when its host disappears.
+/// The cleanup behavior when a view hosting a keyboard-freeze session disappears.
 public enum KeyboardFreezeHostLifecycle: Equatable, Sendable {
-  /// The safe default for a screen-owned session.
+  /// Cancels the session when the host disappears.
   case cancelOnDisappear
 
-  /// Use when a session intentionally outlives a particular host view.
+  /// Leaves cleanup to the caller when the host disappears.
+  ///
+  /// Call ``KeyboardFreeze/cancel()`` when the session is no longer needed.
   case manual
 }

@@ -4,6 +4,10 @@ import UIKit
 /// Tracks a SwiftUI view that overlay content can animate from or position around.
 @MainActor
 @Observable
+/// A source view’s location for positioning a keyboard overlay.
+///
+/// Create a source and attach it to a view with
+/// ``View/keyboardFreezeSource(_:)`` before presenting an overlay from it.
 public final class KeyboardFreezeSource {
   struct WindowResolution {
     let frameInScreen: CGRect
@@ -11,11 +15,13 @@ public final class KeyboardFreezeSource {
     let window: UIWindow
   }
 
+  /// The tracked view’s frame in screen coordinates, or `nil` when unavailable.
   public private(set) var frameInScreen: CGRect?
 
   @ObservationIgnored private var screen: UIScreen?
   @ObservationIgnored private weak var owner: UIView?
 
+  /// Creates a source that has not yet been attached to a view.
   public init() {}
 
   func resolveFrame(on expectedScreen: UIScreen) -> CGRect? {

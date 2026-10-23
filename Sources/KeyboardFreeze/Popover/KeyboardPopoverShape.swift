@@ -1,6 +1,9 @@
 import SwiftUI
 
-/// A continuously rounded shape used at one end of a keyboard popover morph.
+/// The shape of a keyboard popover or its source view.
+///
+/// Use these values with the `sourceShape` and `popoverShape` parameters of
+/// `keyboardPopover` to configure the endpoints of the presentation transition.
 public struct KeyboardPopoverShape: Shape, Sendable {
   private let shape: AnyShape
   private let resolveCornerRadii: @Sendable (CGSize) -> RectangleCornerRadii
@@ -30,7 +33,10 @@ public struct KeyboardPopoverShape: Shape, Sendable {
     uniformCornerRadii(0)
   }
 
-  /// A continuously rounded rectangle with a uniform corner radius.
+  /// Creates a continuously rounded rectangle with a uniform corner radius.
+  ///
+  /// - Parameter cornerRadius: The radius in points. Negative values are treated as zero.
+  /// - Returns: A rounded rectangular popover shape.
   public static func rect(cornerRadius: CGFloat) -> KeyboardPopoverShape {
     let radius = max(cornerRadius, 0)
     return KeyboardPopoverShape(
@@ -40,7 +46,10 @@ public struct KeyboardPopoverShape: Shape, Sendable {
     }
   }
 
-  /// A continuously rounded rectangle with independently configurable corners.
+  /// Creates a continuously rounded rectangle with independently configured corners.
+  ///
+  /// - Parameter cornerRadii: The radius of each corner, in points.
+  /// - Returns: A popover shape with the specified corner radii.
   public static func rect(
     cornerRadii: RectangleCornerRadii
   ) -> KeyboardPopoverShape {
@@ -54,6 +63,10 @@ public struct KeyboardPopoverShape: Shape, Sendable {
     }
   }
 
+  /// Returns the shape’s path in the specified rectangle.
+  ///
+  /// - Parameter rect: The bounds in which to draw the shape.
+  /// - Returns: A path describing the shape within those bounds.
   nonisolated public func path(in rect: CGRect) -> Path {
     shape.path(in: rect)
   }

@@ -1,10 +1,22 @@
 import SwiftUI
 
 extension View {
-  /// Installs the app-side half of a keyboard freeze session.
+  /// Provides a keyboard-freeze session to this view and its descendants.
   ///
-  /// Apply this modifier to the full-screen page that should move with a pinned
-  /// keyboard, rather than to the text field or another nested control.
+  /// Apply this modifier to the page that contains your popover sources.
+  /// For keyboard pinning, apply it to the full page that moves with the snapshot.
+  /// The nearest ancestor with this modifier supplies the session to a popover.
+  ///
+  /// ```swift
+  /// DemoView()
+  ///     .keyboardFreeze(session)
+  /// ```
+  ///
+  /// - Parameters:
+  ///   - keyboardFreeze: The session that manages the page’s presentations.
+  ///   - lifecycle: The cleanup policy when this view disappears. The default
+  ///     cancels the session. Use `.manual` when you manage cleanup yourself.
+  /// - Returns: A view that hosts the session and makes it available to descendants.
   public func keyboardFreeze(
     _ keyboardFreeze: KeyboardFreeze,
     lifecycle: KeyboardFreezeHostLifecycle = .cancelOnDisappear
