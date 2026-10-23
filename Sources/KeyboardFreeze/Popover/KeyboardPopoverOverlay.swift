@@ -157,11 +157,11 @@ struct KeyboardPopoverOverlay<SourceContent: View, PopoverContent: View>: View {
   }
 
   private func completeDismissal() {
-    onSourceHandoff()
-    Task { @MainActor in
-      // Keep the collapsed overlay mounted through at least one 30 Hz display frame
-      // so the restored source is ready before the keyboard-window host is removed.
-      try? await Task.sleep(for: KeyboardPopoverMotion.sourceHandoffDelay)
+    // Replace the collapsed overlay without displaying two glass sources together.
+    var transaction = Transaction(animation: nil)
+    transaction.disablesAnimations = true
+    withTransaction(transaction) {
+      onSourceHandoff()
       onDismissed()
     }
   }
