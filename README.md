@@ -136,3 +136,16 @@ verified on a physical iPhone because Simulator keyboard windows can differ.
 ## License
 
 KeyboardFreeze is available under the MIT License.
+
+### Reading the demo code
+
+The app in `Examples/KeyboardFreezeDemo` consumes the local package in
+`Sources/KeyboardFreeze`; demo helpers are not part of the package.
+
+- `App/DemoAppView.swift`: navigation between the two demos.
+- `Demos/Messages/MessagesDemoView.swift`: minimal integration with a separate glass button.
+- `Demos/ChatGPT/ChatGPTDemoView.swift`: integration with an inline plain button.
+- Each demo owns its menu, presentation state, and keyboard focus.
+- `Helpers`: shared composer layout, button styling, and menu rows/items.
+
+Paths above are relative to `Examples/KeyboardFreezeDemo/KeyboardFreezeDemo`.
