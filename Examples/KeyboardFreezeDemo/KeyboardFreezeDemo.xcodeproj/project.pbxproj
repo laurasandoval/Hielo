@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		D10000000000000000000001 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D20000000000000000000001 /* Assets.xcassets */; };
+		A1000000000000000000000B /* KeyboardFreeze in Frameworks */ = {isa = PBXBuildFile; productRef = AA0000000000000000000002 /* KeyboardFreeze */; };
 		C10000000000000000000000 /* DemoAppView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C20000000000000000000000 /* DemoAppView.swift */; };
 		C10000000000000000000001 /* KeyboardFreezeDemoApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = C20000000000000000000001 /* KeyboardFreezeDemoApp.swift */; };
 		C10000000000000000000002 /* ChatGPTDemoMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = C20000000000000000000002 /* ChatGPTDemoMenu.swift */; };
@@ -17,10 +19,11 @@
 		C10000000000000000000007 /* DemoComposerButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = C20000000000000000000007 /* DemoComposerButton.swift */; };
 		C10000000000000000000008 /* DemoMenuItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = C20000000000000000000008 /* DemoMenuItem.swift */; };
 		C10000000000000000000009 /* DemoMenuRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = C20000000000000000000009 /* DemoMenuRow.swift */; };
-		A1000000000000000000000B /* KeyboardFreeze in Frameworks */ = {isa = PBXBuildFile; productRef = AA0000000000000000000002 /* KeyboardFreeze */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		D20000000000000000000001 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		A2000000000000000000000B /* KeyboardFreezeDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; path = KeyboardFreezeDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C20000000000000000000000 /* DemoAppView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoAppView.swift; sourceTree = "<group>"; };
 		C20000000000000000000001 /* KeyboardFreezeDemoApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardFreezeDemoApp.swift; sourceTree = "<group>"; };
 		C20000000000000000000002 /* ChatGPTDemoMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatGPTDemoMenu.swift; sourceTree = "<group>"; };
@@ -31,7 +34,6 @@
 		C20000000000000000000007 /* DemoComposerButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoComposerButton.swift; sourceTree = "<group>"; };
 		C20000000000000000000008 /* DemoMenuItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoMenuItem.swift; sourceTree = "<group>"; };
 		C20000000000000000000009 /* DemoMenuRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoMenuRow.swift; sourceTree = "<group>"; };
-		A2000000000000000000000B /* KeyboardFreezeDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; path = KeyboardFreezeDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -46,16 +48,80 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-
- A40000000000000000000001 = {isa = PBXGroup; children = (C40000000000000000000000, A40000000000000000000003); sourceTree = "<group>"; };
- A40000000000000000000003 = {isa = PBXGroup; children = (A2000000000000000000000B); name = Products; sourceTree = "<group>"; };
-		C40000000000000000000000 /* KeyboardFreezeDemo */ = {isa = PBXGroup; children = (C40000000000000000000001, C40000000000000000000002, C40000000000000000000005,); path = KeyboardFreezeDemo; sourceTree = "<group>"; };
-		C40000000000000000000001 /* App */ = {isa = PBXGroup; children = (C20000000000000000000000, C20000000000000000000001,); path = App; sourceTree = "<group>"; };
-		C40000000000000000000002 /* Demos */ = {isa = PBXGroup; children = (C40000000000000000000003, C40000000000000000000004,); path = Demos; sourceTree = "<group>"; };
-		C40000000000000000000003 /* ChatGPT */ = {isa = PBXGroup; children = (C20000000000000000000002, C20000000000000000000003,); path = ChatGPT; sourceTree = "<group>"; };
-		C40000000000000000000004 /* Messages */ = {isa = PBXGroup; children = (C20000000000000000000004, C20000000000000000000005,); path = Messages; sourceTree = "<group>"; };
-		C40000000000000000000005 /* Helpers */ = {isa = PBXGroup; children = (C20000000000000000000006, C20000000000000000000007, C20000000000000000000008, C20000000000000000000009,); path = Helpers; sourceTree = "<group>"; };
-
+		A40000000000000000000001 = {
+			isa = PBXGroup;
+			children = (
+				C40000000000000000000000 /* KeyboardFreezeDemo */,
+				A40000000000000000000003 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		A40000000000000000000003 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				A2000000000000000000000B /* KeyboardFreezeDemo.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		C40000000000000000000000 /* KeyboardFreezeDemo */ = {
+			isa = PBXGroup;
+			children = (
+				D20000000000000000000001 /* Assets.xcassets */,
+				C40000000000000000000001 /* App */,
+				C40000000000000000000002 /* Demos */,
+				C40000000000000000000005 /* Helpers */,
+			);
+			path = KeyboardFreezeDemo;
+			sourceTree = "<group>";
+		};
+		C40000000000000000000001 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				C20000000000000000000000 /* DemoAppView.swift */,
+				C20000000000000000000001 /* KeyboardFreezeDemoApp.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		C40000000000000000000002 /* Demos */ = {
+			isa = PBXGroup;
+			children = (
+				C40000000000000000000003 /* ChatGPT */,
+				C40000000000000000000004 /* Messages */,
+			);
+			path = Demos;
+			sourceTree = "<group>";
+		};
+		C40000000000000000000003 /* ChatGPT */ = {
+			isa = PBXGroup;
+			children = (
+				C20000000000000000000002 /* ChatGPTDemoMenu.swift */,
+				C20000000000000000000003 /* ChatGPTDemoView.swift */,
+			);
+			path = ChatGPT;
+			sourceTree = "<group>";
+		};
+		C40000000000000000000004 /* Messages */ = {
+			isa = PBXGroup;
+			children = (
+				C20000000000000000000004 /* MessagesDemoMenu.swift */,
+				C20000000000000000000005 /* MessagesDemoView.swift */,
+			);
+			path = Messages;
+			sourceTree = "<group>";
+		};
+		C40000000000000000000005 /* Helpers */ = {
+			isa = PBXGroup;
+			children = (
+				C20000000000000000000006 /* DemoComposer.swift */,
+				C20000000000000000000007 /* DemoComposerButton.swift */,
+				C20000000000000000000008 /* DemoMenuItem.swift */,
+				C20000000000000000000009 /* DemoMenuRow.swift */,
+			);
+			path = Helpers;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -120,6 +186,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D10000000000000000000001 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -202,11 +269,14 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.laurasandoval.KeyboardFreezeDemo;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_STRICT_CONCURRENCY = complete;
 				SWIFT_VERSION = 6.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
 		};
@@ -228,11 +298,14 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.laurasandoval.KeyboardFreezeDemo;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_STRICT_CONCURRENCY = complete;
 				SWIFT_VERSION = 6.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
 		};

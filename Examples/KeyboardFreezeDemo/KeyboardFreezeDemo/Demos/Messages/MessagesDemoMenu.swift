@@ -3,13 +3,46 @@ import SwiftUI
 struct MessagesDemoMenu: View {
   let onSelect: () -> Void
 
+  private let items: [(title: String, asset: String)] = [
+    ("Camera", "Camera"),
+    ("Photos", "Photos"),
+    ("Stickers", "Stickers"),
+    ("Apple Cash", "AppleCash"),
+    ("Polls", "Polls"),
+    ("Send Later", "SendLater"),
+    ("Genmoji", "Genmoji"),
+    ("Audio", "Audio"),
+    ("App Store", "AppStore"),
+    ("#images", "#images"),
+    ("Check In", "CheckIn"),
+    ("Digital Touch", "DigitalTouch"),
+    ("Drawing", "Drawing"),
+    ("Location", "Location"),
+    ("Music", "Music"),
+  ]
+
   var body: some View {
     ScrollView {
       VStack(spacing: 0) {
-        ForEach(DemoMenuItem.allCases) { item in
+        ForEach(items, id: \.asset) { item in
           Button(action: onSelect) {
-            DemoMenuRow(title: item.title, systemImage: item.systemImage)
-              .contentShape(.rect)
+            HStack(spacing: 27) {
+              Image(item.asset)
+                .resizable()
+                .scaledToFit()
+                .frame(width: 36, height: 36)
+                .clipShape(.circle)
+                .accessibilityHidden(true)
+
+              Text(item.title)
+                .font(.title2)
+                .multilineTextAlignment(.leading)
+
+              Spacer()
+            }
+            .padding(.horizontal, 36)
+            .padding(.vertical, 15)
+            .contentShape(.rect)
           }
           .buttonStyle(.plain)
         }
