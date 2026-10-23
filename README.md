@@ -149,3 +149,14 @@ The app in `Examples/KeyboardFreezeDemo` consumes the local package in
 - `Helpers`: shared composer layout, button styling, and menu rows/items.
 
 Paths above are relative to `Examples/KeyboardFreezeDemo/KeyboardFreezeDemo`.
+
+### Managed sessions and popover styles
+
+For ordinary popovers, apply `.keyboardFreeze()` to the containing page. It
+owns the session and cancels presentations when the page disappears. Keep
+`.keyboardFreeze(session)` when you need explicit pinning or restoration.
+
+Popovers default to a glass source. Apply `.keyboardPopoverStyle(.plain)`
+after `.keyboardPopover(...)` for an inline button without its own glass.
+The presented popover still uses glass. A style can also be inherited from
+an ancestor. Passing `sourceGlass` explicitly overrides the inherited style.

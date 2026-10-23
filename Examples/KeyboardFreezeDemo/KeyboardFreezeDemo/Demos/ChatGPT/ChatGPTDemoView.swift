@@ -2,7 +2,6 @@ import KeyboardFreeze
 import SwiftUI
 
 struct ChatGPTDemoView: View {
-  @State private var session = KeyboardFreeze()
   @State private var text = ""
   @State private var isMenuPresented = false
   @FocusState private var inputIsFocused: Bool
@@ -29,13 +28,13 @@ struct ChatGPTDemoView: View {
           }
           .keyboardPopover(
             isPresented: $isMenuPresented,
-            attachmentAnchor: .leading,
-            sourceGlass: nil
+            attachmentAnchor: .leading
           ) {
             ChatGPTDemoMenu {
               isMenuPresented = false
             }
           }
+          .keyboardPopoverStyle(.plain)
         })
         .padding(inputIsFocused ? 16 : 28)
         .animation(.smooth(duration: 0.2), value: inputIsFocused)
@@ -44,7 +43,7 @@ struct ChatGPTDemoView: View {
     .ignoresSafeArea(.container, edges: .bottom)
     .navigationTitle("ChatGPT")
     .navigationBarTitleDisplayMode(.inline)
-    .keyboardFreeze(session)
+    .keyboardFreeze()
   }
 }
 

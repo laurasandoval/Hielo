@@ -1,6 +1,18 @@
 import SwiftUI
 
 extension View {
+  /// Provides an automatically managed keyboard-freeze session to this page.
+  ///
+  /// Apply this modifier to the page containing your popover sources. The
+  /// session remains stable across view updates and cancels its presentation
+  /// when the page disappears. Use `keyboardFreeze(_:lifecycle:)` instead
+  /// when you need direct access for keyboard pinning or restoration.
+  ///
+  /// - Returns: A view that owns and hosts a keyboard-freeze session.
+  public func keyboardFreeze() -> some View {
+    modifier(KeyboardFreezeAutomaticHostModifier())
+  }
+
   /// Provides a keyboard-freeze session to this view and its descendants.
   ///
   /// Apply this modifier to the page that contains your popover sources.

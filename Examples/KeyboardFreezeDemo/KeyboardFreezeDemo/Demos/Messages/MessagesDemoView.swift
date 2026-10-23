@@ -2,7 +2,6 @@ import KeyboardFreeze
 import SwiftUI
 
 struct MessagesDemoView: View {
-  @State private var session = KeyboardFreeze()
   @State private var text = ""
   @State private var isMenuPresented = false
   @FocusState private var inputIsFocused: Bool
@@ -29,13 +28,13 @@ struct MessagesDemoView: View {
           }
           .keyboardPopover(
             isPresented: $isMenuPresented,
-            attachmentAnchor: .leading,
-            sourceGlass: .regular.interactive()
+            attachmentAnchor: .leading
           ) {
             MessagesDemoMenu {
               isMenuPresented = false
             }
           }
+          .keyboardPopoverStyle(.glass)
         })
         .padding(inputIsFocused ? 16 : 28)
         .animation(.smooth(duration: 0.2), value: inputIsFocused)
@@ -44,7 +43,7 @@ struct MessagesDemoView: View {
     .ignoresSafeArea(.container, edges: .bottom)
     .navigationTitle("Messages")
     .navigationBarTitleDisplayMode(.inline)
-    .keyboardFreeze(session)
+    .keyboardFreeze()
   }
 }
 
