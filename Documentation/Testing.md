@@ -1,4 +1,4 @@
-# Testing KeyboardFreeze
+# Testing Hielo
 
 Run automated tests on an iOS 26 Simulator, then validate every release on a
 physical iPhone.

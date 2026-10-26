@@ -1,12 +1,12 @@
-# KeyboardFreeze
+# Hielo
 
 Present morphing Liquid Glass popovers anywhere, including over a frozen iOS
 system keyboard.
 
-KeyboardFreeze is designed for interactions such as glass menus that open
+Hielo is designed for interactions such as glass menus that open
 over the keyboard without dismissing it.
 
-> KeyboardFreeze uses three private UIKit mechanisms—remote keyboard-window
+> Hielo uses three private UIKit mechanisms—remote keyboard-window
 > lookup, input host-view lookup, and keyboard view snapshotting—lightly
 > obfuscated. Use at your own risk.
 
@@ -27,15 +27,15 @@ https://github.com/laurasandoval/KeyboardFreeze
 ## Present a keyboard popover
 
 Create one session for the screen and install its host modifier on the full
-page. Apply `keyboardPopover` to any source view and size the expanded content
+page. Apply `hieloPopover` to any source view and size the expanded content
 with normal SwiftUI layout modifiers:
 
 ```swift
-import KeyboardFreeze
+import Hielo
 import SwiftUI
 
 struct ChatView: View {
-  @State private var keyboardFreeze = KeyboardFreeze()
+  @State private var session = HieloSession()
   @State private var isMenuPresented = false
   @FocusState private var inputIsFocused: Bool
 
@@ -47,7 +47,7 @@ struct ChatView: View {
         isMenuPresented = true
       }
         .frame(width: 48, height: 48)
-        .keyboardPopover(
+        .hieloPopover(
           isPresented: $isMenuPresented,
           attachmentAnchor: .leading
         ) {
@@ -58,7 +58,7 @@ struct ChatView: View {
       TextField("Message", text: .constant(""))
         .focused($inputIsFocused)
     }
-    .keyboardFreeze(keyboardFreeze)
+    .hieloHost(session)
   }
 }
 ```
@@ -74,7 +74,7 @@ rectangle with a 32-point corner radius. Customize both ends with familiar
 SwiftUI-style shapes:
 
 ```swift
-.keyboardPopover(
+.hieloPopover(
   isPresented: $isMenuPresented,
   sourceShape: .rect(cornerRadius: 12),
   popoverShape: .rect(cornerRadius: 24)
@@ -88,7 +88,7 @@ For a source that already owns its appearance, including a non-glass source,
 pass `sourceGlass: nil`. The expanded popover remains Liquid Glass:
 
 ```swift
-.keyboardPopover(
+.hieloPopover(
   isPresented: $isMenuPresented,
   sourceGlass: nil,
   sourceShape: .circle,
@@ -109,7 +109,7 @@ dragged in any direction. Only a downward release dismisses it.
 
 When expanded content would cross an edge, the popover translates into the
 available safe area without changing its natural size. Content larger than the
-safe area pins to its leading or top edge. KeyboardFreeze never resizes the
+safe area pins to its leading or top edge. Hielo never resizes the
 consumer's view to prevent overflow.
 
 Popover content mounts once per presentation, so its local state resets when
@@ -118,37 +118,37 @@ is copied when the popover opens; later ancestor environment changes are not
 forwarded automatically. Use bindings or observable models for changing data,
 and set `isPresented` to `false` to dismiss.
 
-For fully custom presentations, `presentOverlay` and `KeyboardFreezeSource`
+For fully custom presentations, `presentOverlay` and `HieloSource`
 remain available as lower-level APIs. Supply environment dependencies explicitly
 when creating content through these imperative methods.
 
 ## Failure handling
 
-Low-level keyboard-presentation methods return `KeyboardFreezeActivationResult`.
+Low-level keyboard-presentation methods return `HieloActivationResult`.
 When required keyboard resources cannot be resolved, activation returns
 `.keyboardUnavailable` and leaves the live keyboard alone. These checks are
-best-effort: an incompatible private implementation can still fail at runtime. `keyboardPopover` falls back to the app window when a
+best-effort: an incompatible private implementation can still fail at runtime. `hieloPopover` falls back to the app window when a
 keyboard capture is unavailable and fails closed only when it cannot resolve
 its source or host.
 
-Use one `KeyboardFreeze` instance per screen or flow. Call `cancel()` when a
+Use one `HieloSession` instance per screen or flow. Call `cancel()` when a
 manually managed session is no longer needed; the default host lifecycle
 cancels automatically when its view disappears.
 
 ## Example app
 
-Open `Examples/KeyboardFreezeDemo/KeyboardFreezeDemo.xcodeproj` to run the
+Open `Examples/HieloDemo/HieloDemo.xcodeproj` to run the
 minimal morphing glass-menu example. Keyboard snapshot behavior must also be
 verified on a physical iPhone because Simulator keyboard windows can differ.
 
 ## License
 
-KeyboardFreeze is available under the MIT License.
+Hielo is available under the MIT License.
 
 ### Reading the demo code
 
-The app in `Examples/KeyboardFreezeDemo` consumes the local package in
-`Sources/KeyboardFreeze`; demo helpers are not part of the package.
+The app in `Examples/HieloDemo` consumes the local package in
+`Sources/Hielo`; demo helpers are not part of the package.
 
 - `App/DemoAppView.swift`: navigation between the two demos.
 - `Demos/Messages/MessagesDemoView.swift`: minimal integration with a separate glass button.
@@ -156,22 +156,22 @@ The app in `Examples/KeyboardFreezeDemo` consumes the local package in
 - Each demo owns its menu, presentation state, and keyboard focus.
 - `Helpers`: shared composer layout and button styling. Menu types stay in their demo.
 
-Paths above are relative to `Examples/KeyboardFreezeDemo/KeyboardFreezeDemo`.
+Paths above are relative to `Examples/HieloDemo/HieloDemo`.
 
 ### Managed sessions and popover styles
 
-For ordinary popovers, apply `.keyboardFreeze()` to the containing page. It
+For ordinary popovers, apply `.hieloHost()` to the containing page. It
 owns the session and cancels presentations when the page disappears. Keep
-`.keyboardFreeze(session)` when you need explicit pinning or restoration.
+`.hieloHost(session)` when you need explicit pinning or restoration.
 
-Popovers default to a glass source. Apply `.keyboardPopoverStyle(.plain)`
-after `.keyboardPopover(...)` for an inline button without its own glass.
+Popovers default to a glass source. Apply `.hieloPopoverStyle(.plain)`
+after `.hieloPopover(...)` for an inline button without its own glass.
 The presented popover still uses glass. A style can also be inherited from
 an ancestor. Passing `sourceGlass` explicitly overrides the inherited style.
 
 ### Animation
 
-Use `.keyboardPopoverAnimation(.spring(duration: 0.4, bounce: 0.2))` after the
+Use `.hieloPopoverAnimation(.spring(duration: 0.4, bounce: 0.2))` after the
 popover modifier or on an ancestor to customize opening, dismissal, and drag
 snap-back. The default is `.spring(duration: 0.3, bounce: 0.2)`. Pass `nil` to
 disable animation. The choice is captured at presentation time; Reduce Motion

@@ -1,6 +1,6 @@
 # Architecture
 
-KeyboardFreeze owns one `@MainActor` session per consuming screen or flow. Its
+Hielo owns one `@MainActor` session per consuming screen or flow. Its
 public `Status` is an observable summary of an internal ownership state machine:
 
 ```text
@@ -20,7 +20,7 @@ presentation is active. It consumes outside taps without activating underlying
 controls. The page-level SwiftUI shield remains a fallback for low-level callers
 whose source app window cannot be resolved.
 
-When no keyboard capture is available, `KeyboardPopover` inserts the same
+When no keyboard capture is available, `HieloPopover` inserts the same
 presentation view into its source app window without a snapshot. Centered
 attachment-axis components resolve toward the nearest screen edge, so the
 popover grows toward the side with more available space. Explicit attachment
@@ -29,7 +29,7 @@ components remain unchanged.
 The input remains focused, so the app retains its cursor and keyboard-driven
 layout.
 
-`KeyboardPopover` measures its source in SwiftUI screen coordinates; the UIKit
+`HieloPopover` measures its source in SwiftUI screen coordinates; the UIKit
 source resolver identifies the app window. These measurements are intentionally
 separate because keyboard and app windows can use different coordinate spaces.
 The session converts source geometry into the host window's coordinates.
@@ -57,10 +57,10 @@ release.
 
 | Owner | Responsibility |
 | --- | --- |
-| `KeyboardFreeze` | Owns one active presentation and its cleanup. Public entry points live in `Session/KeyboardFreeze.swift`; overlay and restoration mechanics live in `Session/Internal`. |
-| `KeyboardFreezeOverlayPresentation` | Owns the UIKit host, snapshot, outside-tap recognizer, and one-shot teardown notification. |
-| `KeyboardPopover` | Owns the binding, source measurement, and active presentation ID. |
-| `KeyboardPopoverOverlay` | Owns content measurement, expansion, drag, and dismissal animation. |
+| `HieloSession` | Owns one active presentation and its cleanup. Public entry points live in `Session/HieloSession.swift`; overlay and restoration mechanics live in `Session/Internal`. |
+| `HieloOverlayPresentation` | Owns the UIKit host, snapshot, outside-tap recognizer, and one-shot teardown notification. |
+| `HieloPopover` | Owns the binding, source measurement, and active presentation ID. |
+| `HieloPopoverOverlay` | Owns content measurement, expansion, drag, and dismissal animation. |
 
 The popover lifecycle is request → mount/measure → expand → collapse → teardown.
 A session cancellation or source disappearance can go directly to teardown from
@@ -72,7 +72,7 @@ from a removed host from dismissing a later presentation. Normal collapse remove
 the host and restores the source in the same nonanimated transaction to avoid
 displaying two glass surfaces during handoff.
 
-`keyboardPopover` copies the source's SwiftUI environment into the separate
+`hieloPopover` copies the source's SwiftUI environment into the separate
 hosting root at presentation time. This is a snapshot, not a live bridge for
 later ancestor environment changes. Bindings and observable reference models
 remain the way to supply changing data. The low-level imperative `presentOverlay`
@@ -87,7 +87,7 @@ scroll views using ordinary SwiftUI layout.
 
 ## Pinned presentation
 
-The snapshot is mounted by the root `.keyboardFreeze(_:)` modifier before the
+The snapshot is mounted by the root `.hieloHost(_:)` modifier before the
 consumer's focus closure runs. The live keyboard resigns focus with UIKit
 animations suppressed for the smallest possible interval. Because the snapshot
 belongs to the modified page, it follows the page's offset and transforms.
@@ -105,7 +105,7 @@ request is queued until repinning completes.
 
 ## Runtime boundary
 
-`KeyboardFreezeRuntimeProviding` isolates keyboard discovery, private symbol
+`HieloRuntimeProviding` isolates keyboard discovery, private symbol
 lookup, snapshot creation, and timeline pausing. Tests inject a fake runtime and
 never call private UIKit APIs.
 

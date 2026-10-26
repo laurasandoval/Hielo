@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to KeyboardFreeze will be documented here.
+All notable changes to Hielo will be documented here.
 
 ## Unreleased
 

@@ -3,21 +3,21 @@
 import PackageDescription
 
 let package = Package(
-  name: "KeyboardFreeze",
+  name: "Hielo",
   platforms: [
     .iOS(.v26),
   ],
   products: [
     .library(
-      name: "KeyboardFreeze",
-      targets: ["KeyboardFreeze"]
+      name: "Hielo",
+      targets: ["Hielo"]
     ),
   ],
   targets: [
-    .target(name: "KeyboardFreeze"),
+    .target(name: "Hielo"),
     .testTarget(
-      name: "KeyboardFreezeTests",
-      dependencies: ["KeyboardFreeze"]
+      name: "HieloTests",
+      dependencies: ["Hielo"]
     ),
   ],
   swiftLanguageModes: [.v6]
