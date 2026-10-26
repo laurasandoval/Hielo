@@ -6,7 +6,7 @@ struct ChatGPTDemoMenu: View {
   var body: some View {
     ScrollView {
       VStack(spacing: 0) {
-        ForEach(DemoMenuItem.allCases) { item in
+        ForEach([DemoMenuItem.camera, .photos, .files]) { item in
           Button(action: onSelect) {
             DemoMenuRow(title: item.title, systemImage: item.systemImage)
               .contentShape(.rect)
@@ -14,9 +14,9 @@ struct ChatGPTDemoMenu: View {
           .buttonStyle(.plain)
         }
       }
-      .padding(.vertical, 21)
+      .padding(.vertical, 12)
     }
-    .frame(width: 300, height: 450)
+    .frame(width: 300, height: 228)
     .scrollIndicators(.hidden)
   }
 }

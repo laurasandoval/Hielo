@@ -28,7 +28,8 @@ struct ChatGPTDemoView: View {
           }
           .keyboardPopover(
             isPresented: $isMenuPresented,
-            attachmentAnchor: .leading
+            attachmentAnchor: .leading,
+            popoverShape: .rect(cornerRadius: 45)
           ) {
             ChatGPTDemoMenu {
               isMenuPresented = false

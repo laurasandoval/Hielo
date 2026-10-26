@@ -27,9 +27,9 @@ enum DemoMenuItem: CaseIterable, Identifiable {
 
   var systemImage: String {
     switch self {
-    case .camera: "camera.fill"
-    case .photos: "photo.fill"
-    case .files: "folder.fill"
+    case .camera: "camera"
+    case .photos: "photo"
+    case .files: "paperclip"
     case .network: "network"
     case .audio: "waveform.path"
     case .clipboard: "clipboard.fill"

@@ -7,20 +7,20 @@ struct DemoMenuRow: View {
     var body: some View {
         HStack(spacing: 12) {
             Image(systemName: systemImage)
-                .font(.system(size: 16, weight: .medium))
-                .foregroundStyle(.secondary)
-                .frame(width: 36, height: 36)
-                .background(.tertiary)
+                .font(.system(size: 17, weight: .medium))
+                .foregroundStyle(.primary)
+                .frame(width: 44, height: 44)
+                .background(.quaternary)
                 .clipShape(Circle())
 
             Text(title)
-                .font(.title2)
+                .font(.system(size: 20))
                 .multilineTextAlignment(.leading)
 
             Spacer()
         }
-        .padding(.horizontal, 36.0)
-        .padding(.vertical, 15.0)
+        .padding(.horizontal, 24)
+        .padding(.vertical, 12)
     }
 }
 
