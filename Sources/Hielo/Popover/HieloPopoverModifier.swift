@@ -4,7 +4,7 @@ extension View {
   /// Presents a popover while preserving the keyboard’s appearance when a binding is true.
   ///
   /// Use this modifier to present custom content from a view, such as a button.
-  /// Apply ``View/hieloHost()`` to an ancestor to provide the
+  /// Apply ``View/hieloHost(_:lifecycle:)`` to an ancestor to provide the
   /// session that manages the presentation.
   ///
   /// The following example presents a menu from a button:
@@ -72,13 +72,14 @@ extension View {
   /// Presents a popover while preserving the keyboard’s appearance when a binding is true.
   ///
   /// Use this modifier to present custom content from a view, such as a button.
-  /// Apply ``View/hieloHost()`` to an ancestor to provide the
+  /// Apply ``View/hieloHost(_:lifecycle:)`` to an ancestor to provide the
   /// session that manages the presentation.
   ///
   /// The following example presents a menu from a button:
   ///
   /// ```swift
   /// struct PopoverExample: View {
+  ///     @State private var session = HieloSession()
   ///     @State private var isPresented = false
   ///
   ///     var body: some View {
@@ -89,7 +90,7 @@ extension View {
   ///             Text("Menu content")
   ///                 .padding()
   ///         }
-  ///         .hieloHost()
+  ///         .hieloHost(session)
   ///     }
   /// }
   /// ```

@@ -1,7 +1,7 @@
 import SwiftUI
 
 extension View {
-  /// Sets the animation for Hielo popovers within this view.
+  /// Sets the animation for keyboard popovers within this view.
   ///
   /// Apply this modifier after `hieloPopover` or to an ancestor. The animation
   /// controls presentation, dismissal, and the return after an incomplete drag.
@@ -18,7 +18,7 @@ extension View {
   /// dismissal from reaching its cleanup completion.
   ///
   /// - Parameter animation: A SwiftUI animation, or `nil` to disable animation.
-  /// - Returns: A view that supplies the animation to its Hielo popovers.
+  /// - Returns: A view that supplies the animation to its keyboard popovers.
   public func hieloPopoverAnimation(_ animation: Animation?) -> some View {
     environment(\.hieloPopoverAnimation, animation)
   }

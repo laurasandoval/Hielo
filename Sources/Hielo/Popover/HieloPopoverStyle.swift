@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// The appearance and transition of a Hielo popover’s source.
+/// The appearance and transition of a keyboard popover’s source.
 public enum HieloPopoverStyle: Sendable {
   /// An interactive glass source that morphs into the popover. The default style.
   case glass

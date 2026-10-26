@@ -43,6 +43,55 @@ extension HieloSession {
     )
   }
 
+  // MARK: - Overlay internals
+
+  func presentOverlayErased(
+    sourceFrame: CGRect,
+    overlayFrame: (Context) -> CGRect,
+    onOutsideTap: (@MainActor () -> Void)?,
+    content: (Context) -> AnyView
+  ) -> HieloActivationResult {
+    guard case .idle = storage else {
+      return .blockedByActivePresentation(status)
+    }
+    guard let capture = runtime.capture() else {
+      return .keyboardUnavailable
+    }
+    return startOverlayPresentation(
+      capture: capture,
+      sourceFrame: sourceFrame,
+      overlayFrame: overlayFrame,
+      onOutsideTap: onOutsideTap,
+      content: content
+    )
+  }
+
+  func presentOverlayFromSourceErased(
+    source: HieloSource,
+    overlayFrame: (Context) -> CGRect,
+    onOutsideTap: (@MainActor () -> Void)?,
+    content: (Context) -> AnyView
+  ) -> HieloActivationResult {
+    guard case .idle = storage else {
+      return .blockedByActivePresentation(status)
+    }
+    guard let capture = runtime.capture() else {
+      return .keyboardUnavailable
+    }
+    guard let sourceFrame = source.resolveFrame(on: capture.keyboardWindow.screen) else {
+      return .sourceUnavailable
+    }
+
+    return startOverlayPresentation(
+      capture: capture,
+      sourceWindow: source.resolveWindow()?.window,
+      sourceFrame: sourceFrame,
+      overlayFrame: overlayFrame,
+      onOutsideTap: onOutsideTap,
+      content: content
+    )
+  }
+
   private func startOverlayPresentation(
     id: UUID = UUID(),
     onEnded: (@MainActor () -> Void)? = nil,
@@ -123,6 +172,8 @@ extension HieloSession {
       currentPresentation === presentation
     else { return }
 
+    overlayDismissalTask?.cancel()
+    overlayDismissalTask = nil
     setStorage(.idle)
     presentation.tearDown()
   }

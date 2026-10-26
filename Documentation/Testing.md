@@ -42,8 +42,8 @@ physical iPhone.
   state resets on reopening. Bind model state if it must survive dismissal.
 - Begin with empty content that later loads; confirm outside taps still dismiss
   while waiting and the menu expands when a finite size becomes available.
-- Set the presentation binding to `false` during opening and while expanded;
-  confirm the source returns and reopening works.
+- Call `cancel()` or `dismissOverlay()` during opening and while expanded;
+  confirm the binding resets, source returns, and reopening works.
 - With a menu open, tap Back: confirm only the menu dismisses. Tap Back again
   and confirm navigation proceeds. Repeat with and without keyboard focus.
 - Navigate programmatically during opening or collapse; confirm no menu or
@@ -60,7 +60,7 @@ physical iPhone.
 - Background and foreground during each active state
 - Rotation and multitasking where the consuming app supports them
 
-Missing keyboard runtime support should fall back to the app-window presentation.
-A missing source/host should reset the binding without leaving an interaction shield.
+Missing runtime symbols should produce `.keyboardUnavailable` and release any
+interaction shields, hidden keyboard windows, and animation suppression.
 Existing private symbols may still have incompatible implementations on a new OS;
 the symbol checks alone cannot rule out a runtime crash.

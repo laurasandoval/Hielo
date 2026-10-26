@@ -1,11 +1,14 @@
 # Architecture
 
-Each `.hieloHost()` owns an internal `@MainActor` session. The session manages
-one popover presentation at a time: `idle → overlay → idle`. Consumers use
-bindings and modifiers; the session and source resolver are implementation details.
+Hielo owns one `@MainActor` session per consuming screen or flow. Its
+public `Status` is an observable summary of an internal ownership state machine:
 
-Keyboard pinning and restoration are preserved on
-`laurasandoval--keyboard-pinning`, outside the first release's API and runtime.
+```text
+idle
+├── overlay
+└── pinned ── restoring ── idle
+                 └── repinning ── pinned
+```
 
 ## Overlay presentation
 
@@ -14,8 +17,8 @@ full-window presentation view is inserted into the system keyboard window with
 that snapshot and the SwiftUI overlay content above it. A presentation-owned interaction
 shield blocks the source app window, including navigation controls, while the
 presentation is active. It consumes outside taps without activating underlying
-controls. The page-level SwiftUI shield remains a fallback when the source app window
-cannot be resolved.
+controls. The page-level SwiftUI shield remains a fallback for low-level callers
+whose source app window cannot be resolved.
 
 When no keyboard capture is available, `HieloPopover` inserts the same
 presentation view into its source app window without a snapshot. Centered
@@ -54,7 +57,7 @@ release.
 
 | Owner | Responsibility |
 | --- | --- |
-| `HieloSession` | Owns one active presentation and its cleanup. The session is internal; overlay mechanics live in `Session/Internal`. |
+| `HieloSession` | Owns one active presentation and its cleanup. Public entry points live in `Session/HieloSession.swift`; overlay and restoration mechanics live in `Session/Internal`. |
 | `HieloOverlayPresentation` | Owns the UIKit host, snapshot, outside-tap recognizer, and one-shot teardown notification. |
 | `HieloPopover` | Owns the binding, source measurement, and active presentation ID. |
 | `HieloPopoverOverlay` | Owns content measurement, expansion, drag, and dismissal animation. |
@@ -72,13 +75,33 @@ displaying two glass surfaces during handoff.
 `hieloPopover` copies the source's SwiftUI environment into the separate
 hosting root at presentation time. This is a snapshot, not a live bridge for
 later ancestor environment changes. Bindings and observable reference models
-remain the way to supply changing data. Presentation-scoped actions such as SwiftUI `dismiss`
-are not rebound to this custom host; dismiss through `isPresented`.
+remain the way to supply changing data. The low-level imperative `presentOverlay`
+API has no originating SwiftUI environment; its caller must supply dependencies
+on the content it returns. Presentation-scoped actions such as SwiftUI `dismiss`
+are not rebound to this custom host; dismiss through `isPresented` or the session.
 
 Content-local state lasts for one presentation and resets when reopened. Put
 state that must survive dismissal in the consuming view or model. Consumer
 content must have a finite natural size; constrain flexible containers such as
 scroll views using ordinary SwiftUI layout.
+
+## Pinned presentation
+
+The snapshot is mounted by the root `.hieloHost(_:)` modifier before the
+consumer's focus closure runs. The live keyboard resigns focus with UIKit
+animations suppressed for the smallest possible interval. Because the snapshot
+belongs to the modified page, it follows the page's offset and transforms.
+
+## Restoration
+
+The frozen snapshot stays visible while focus returns. A display link hides all
+keyboard windows, including replacements created during restoration. On the
+matching keyboard-did-show notification, window alpha is restored and the
+snapshot is removed in one frame.
+
+If restoration is interrupted, the session moves through `repinning`, dismisses
+the live keyboard again, and retains the original snapshot. A newer focus
+request is queued until repinning completes.
 
 ## Runtime boundary
 

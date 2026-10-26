@@ -33,6 +33,8 @@ final class HieloRuntimeTests: XCTestCase {
 
   func testActivationResultSuccess() {
     XCTAssertTrue(HieloActivationResult.started.succeeded)
+    XCTAssertTrue(HieloActivationResult.alreadyActive.succeeded)
+    XCTAssertFalse(HieloActivationResult.keyboardUnavailable.succeeded)
     XCTAssertFalse(HieloActivationResult.sourceUnavailable.succeeded)
   }
 }
