@@ -20,6 +20,7 @@
 		C10000000000000000000008 /* ChatGPTDemoMenuItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = C20000000000000000000008 /* ChatGPTDemoMenuItem.swift */; };
 		C10000000000000000000009 /* ChatGPTDemoMenuRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = C20000000000000000000009 /* ChatGPTDemoMenuRow.swift */; };
 		D10000000000000000000001 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D20000000000000000000001 /* Assets.xcassets */; };
+		C1000000000000000000000B /* DemoRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2000000000000000000000B /* DemoRow.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -36,6 +37,7 @@
 		C20000000000000000000008 /* ChatGPTDemoMenuItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatGPTDemoMenuItem.swift; sourceTree = "<group>"; };
 		C20000000000000000000009 /* ChatGPTDemoMenuRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatGPTDemoMenuRow.swift; sourceTree = "<group>"; };
 		D20000000000000000000001 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		C2000000000000000000000B /* DemoRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoRow.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -121,6 +123,7 @@
 			children = (
 				C20000000000000000000006 /* DemoComposer.swift */,
 				C20000000000000000000007 /* DemoComposerButton.swift */,
+				C2000000000000000000000B /* DemoRow.swift */,
 			);
 			path = Helpers;
 			sourceTree = "<group>";
@@ -209,6 +212,7 @@
 				C10000000000000000000005 /* MessagesDemoView.swift in Sources */,
 				C10000000000000000000006 /* DemoComposer.swift in Sources */,
 				C10000000000000000000007 /* DemoComposerButton.swift in Sources */,
+				C1000000000000000000000B /* DemoRow.swift in Sources */,
 				C10000000000000000000008 /* ChatGPTDemoMenuItem.swift in Sources */,
 				C10000000000000000000009 /* ChatGPTDemoMenuRow.swift in Sources */,
 			);

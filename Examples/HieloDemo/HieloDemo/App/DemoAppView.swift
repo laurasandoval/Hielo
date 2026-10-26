@@ -7,15 +7,23 @@ struct DemoAppView: View {
         NavigationLink {
           MessagesDemoView()
         } label: {
-          Label("Messages — glass button", systemImage: "message")
+          DemoRow(
+            title: "Messages",
+            subtitle: "Glass popover button",
+            imageName: "AppIcon-Messages"
+          )
         }
         NavigationLink {
           ChatGPTDemoView()
         } label: {
-          Label("ChatGPT — inline button", systemImage: "bubble.left.and.bubble.right")
+          DemoRow(
+            title: "ChatGPT",
+            subtitle: "Inline popover button",
+            imageName: "AppIcon-ChatGPT"
+          )
         }
       }
-      .navigationTitle("HieloSession Demos")
+      .navigationTitle("Demos")
     }
   }
 }
