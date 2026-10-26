@@ -1,6 +1,6 @@
-# KeyboardFreeze agent guide
+# Hielo agent guide
 
-KeyboardFreeze is an iOS 26+ Swift package with a small public SwiftUI API and
+Hielo is an iOS 26+ Swift package with a small public SwiftUI API and
 an internal UIKit runtime. Keep the public product free of third-party
 dependencies.
 
@@ -40,13 +40,13 @@ at your own risk. Handle missing symbols gracefully; symbol presence does not gu
 
 ## Project structure
 
-- `Sources/KeyboardFreeze/Session`: public session API; `Internal` holds overlay and restoration mechanics
-- `Sources/KeyboardFreeze/Hosting`: app- and keyboard-window presentation hosts
-- `Sources/KeyboardFreeze/Pinning`: pinned snapshot and restoration ownership
-- `Sources/KeyboardFreeze/Popover`: public modifiers and styles; `Internal` holds UI, placement, and motion
-- `Sources/KeyboardFreeze/Runtime`: private UIKit discovery and capture boundary
-- `Tests/KeyboardFreezeTests`: tests grouped to mirror source features
-- `Examples/KeyboardFreezeDemo`: the iOS demonstration app
+- `Sources/Hielo/Session`: public session API; `Internal` holds overlay and restoration mechanics
+- `Sources/Hielo/Hosting`: app- and keyboard-window presentation hosts
+- `Sources/Hielo/Pinning`: pinned snapshot and restoration ownership
+- `Sources/Hielo/Popover`: public modifiers and styles; `Internal` holds UI, placement, and motion
+- `Sources/Hielo/Runtime`: private UIKit discovery and capture boundary
+- `Tests/HieloTests`: tests grouped to mirror source features
+- `Examples/HieloDemo`: the iOS demonstration app
 - `Documentation`: architecture and physical-device verification
 
 Use one Swift type per file. Prefer SwiftUI in the example app; UIKit is
@@ -62,3 +62,11 @@ Use verification appropriate to the changed behavior and report precisely what
 was checked. Follow `Documentation/Testing.md` on a physical iPhone before
 release; a successful build alone does not validate private keyboard runtime
 behavior. Respect the contributor’s local instructions for test and device use.
+
+## Contributions
+
+- Prefer branch names `{github-username}--{custom-branch-name}`, all lowercase.
+- Use lowercase, subject-only commit messages.
+- Before copying this package into a consumer repository for a bespoke need,
+  consider a pull request here when the functionality could benefit consumers
+  worldwide. Keep genuinely app-specific behavior in the consumer.
