@@ -21,11 +21,8 @@ over the keyboard without dismissing it.
 In Xcode, choose **File → Add Package Dependencies** and enter:
 
 ```text
-https://github.com/laurasandoval/KeyboardFreeze
+https://github.com/laurasandoval/Hielo
 ```
-
-The repository URL currently retains the original KeyboardFreeze name; the
-Swift package product and import are `Hielo`.
 
 ## Present a popover
 
