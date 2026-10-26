@@ -162,37 +162,29 @@ enum KeyboardFreezeRuntime {
     snapshotView.layer.timeOffset = pausedTime
   }
 
-  static var remoteKeyboardWindowClassName: String {
+  static let remoteKeyboardWindowClassName =
     assembled(["Window", "Keyboard", "Remote", "UI"])
-  }
 
-  static var keyboardSceneDelegateSelectorName: String {
+  static let keyboardSceneDelegateSelectorName =
     assembled(["Delegate", "Scene", "keyboard"])
-  }
 
-  static var keyboardWindowSelectorName: String {
+  static let keyboardWindowSelectorName =
     assembled(["Window", "keyboard"])
-  }
 
-  static var inputSetHostViewClassName: String {
+  static let inputSetHostViewClassName =
     assembled(["View", "Host", "Set", "Input", "UI"])
-  }
 
-  static var textEffectsWindowClassName: String {
+  static let textEffectsWindowClassName =
     assembled(["Window", "Effects", "Text", "UI"])
-  }
 
-  static var snapshotterClassName: String {
+  static let snapshotterClassName =
     assembled(["Snapshotter", "Tree", "View", "KB", "UI"])
-  }
 
-  static var snapshotterFactorySelectorName: String {
+  static let snapshotterFactorySelectorName =
     assembled(["Updates:", "Screen", "after", "View:", "Keyboard", "For", "snapshotter"])
-  }
 
-  static var snapshotViewSelectorName: String {
+  static let snapshotViewSelectorName =
     assembled(["View", "snapshot"])
-  }
 
   static func assembled(_ components: [String]) -> String {
     components.reversed().joined()
