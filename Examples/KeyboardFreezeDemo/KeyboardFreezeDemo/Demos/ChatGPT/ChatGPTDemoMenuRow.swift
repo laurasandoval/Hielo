@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct DemoMenuRow: View {
+struct ChatGPTDemoMenuRow: View {
     let title: String
     let systemImage: String
 
