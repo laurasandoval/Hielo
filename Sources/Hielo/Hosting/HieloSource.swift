@@ -8,7 +8,7 @@ import UIKit
 ///
 /// Create a source and attach it to a view with
 /// ``View/hieloSource(_:)`` before presenting an overlay from it.
-public final class HieloSource {
+final class HieloSource {
   struct WindowResolution {
     let frameInScreen: CGRect
     let safeAreaFrameInScreen: CGRect
@@ -16,7 +16,7 @@ public final class HieloSource {
   }
 
   /// The tracked view’s frame in screen coordinates, or `nil` when unavailable.
-  public private(set) var frameInScreen: CGRect?
+  private(set) var frameInScreen: CGRect?
 
   @ObservationIgnored var onDetach: (@MainActor () -> Void)?
 
@@ -24,7 +24,7 @@ public final class HieloSource {
   @ObservationIgnored private weak var owner: UIView?
 
   /// Creates a source that has not yet been attached to a view.
-  public init() {}
+  init() {}
 
   func resolveFrame(on expectedScreen: UIScreen) -> CGRect? {
     guard screen === expectedScreen else { return nil }

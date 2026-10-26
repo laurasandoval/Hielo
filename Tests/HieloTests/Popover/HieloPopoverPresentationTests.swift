@@ -8,11 +8,7 @@ import XCTest
 final class HieloPopoverPresentationTests: XCTestCase {
   func testPresentedPopoverStartsOverlayWhileKeyboardIsAvailable() async {
     let runtime = FakeHieloRuntime.populated()
-    let session = HieloSession(
-      configuration: .init(),
-      runtime: runtime,
-      notificationCenter: NotificationCenter()
-    )
+    let session = HieloSession(runtime: runtime)
     let window = FakeHieloRuntime.makeWindow()
     window.frame = CGRect(x: 37, y: 53, width: 390, height: 700)
     let rootView = VStack {
@@ -28,7 +24,7 @@ final class HieloPopoverPresentationTests: XCTestCase {
         }
     }
     .frame(width: 390, height: 700)
-    .hieloHost(session, lifecycle: .manual)
+    .hieloHost(session)
     let hostingController = UIHostingController(rootView: rootView)
 
     defer {

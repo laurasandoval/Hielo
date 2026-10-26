@@ -24,18 +24,19 @@ In Xcode, choose **File → Add Package Dependencies** and enter:
 https://github.com/laurasandoval/KeyboardFreeze
 ```
 
-## Present a keyboard popover
+The repository URL currently retains the original KeyboardFreeze name; the
+Swift package product and import are `Hielo`.
 
-Create one session for the screen and install its host modifier on the full
-page. Apply `hieloPopover` to any source view and size the expanded content
-with normal SwiftUI layout modifiers:
+## Present a popover
+
+Apply `.hieloHost()` to the containing page and `.hieloPopover` to its source
+view. Size the expanded content with normal SwiftUI layout modifiers:
 
 ```swift
 import Hielo
 import SwiftUI
 
 struct ChatView: View {
-  @State private var session = HieloSession()
   @State private var isMenuPresented = false
   @FocusState private var inputIsFocused: Bool
 
@@ -58,7 +59,7 @@ struct ChatView: View {
       TextField("Message", text: .constant(""))
         .focused($inputIsFocused)
     }
-    .hieloHost(session)
+    .hieloHost()
   }
 }
 ```
@@ -118,22 +119,26 @@ is copied when the popover opens; later ancestor environment changes are not
 forwarded automatically. Use bindings or observable models for changing data,
 and set `isPresented` to `false` to dismiss.
 
-For fully custom presentations, `presentOverlay` and `HieloSource`
-remain available as lower-level APIs. Supply environment dependencies explicitly
-when creating content through these imperative methods.
+## Presentation lifecycle
 
-## Failure handling
+The host owns its session automatically. Dismissing the popover or removing its
+source cleans up the presentation. Taps outside, including on navigation
+controls, dismiss the popover without activating the control underneath.
 
-Low-level keyboard-presentation methods return `HieloActivationResult`.
-When required keyboard resources cannot be resolved, activation returns
-`.keyboardUnavailable` and leaves the live keyboard alone. These checks are
-best-effort: an incompatible private implementation can still fail at runtime. `hieloPopover` falls back to the app window when a
-keyboard capture is unavailable and fails closed only when it cannot resolve
-its source or host.
+When keyboard capture is unavailable, the popover falls back to the app window.
+If the source or host cannot be resolved, the presentation binding resets to
+`false`. Private-runtime checks are best-effort: an incompatible implementation
+can still fail at runtime.
 
-Use one `HieloSession` instance per screen or flow. Call `cancel()` when a
-manually managed session is no longer needed; the default host lifecycle
-cancels automatically when its view disappears.
+## Release scope
+
+The first release exposes `.hieloPopover`, `.hieloPopoverStyle`,
+`.hieloPopoverAnimation`, and `.hieloHost()`, with `HieloPopoverStyle` and
+`HieloPopoverShape` for customization. Session and source machinery are internal.
+
+The explicit `HieloSession` API for keyboard pinning, restoration, and custom
+overlays is preserved on `laurasandoval--keyboard-pinning`. It is not part of
+this branch's public API.
 
 ## Example app
 
@@ -158,11 +163,7 @@ The app in `Examples/HieloDemo` consumes the local package in
 
 Paths above are relative to `Examples/HieloDemo/HieloDemo`.
 
-### Managed sessions and popover styles
-
-For ordinary popovers, apply `.hieloHost()` to the containing page. It
-owns the session and cancels presentations when the page disappears. Keep
-`.hieloHost(session)` when you need explicit pinning or restoration.
+### Popover styles
 
 Popovers default to a glass source. Apply `.hieloPopoverStyle(.plain)`
 after `.hieloPopover(...)` for an inline button without its own glass.

@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// The shape of a keyboard popover or its source view.
+/// The shape of a Hielo popover or its source view.
 ///
 /// Use these values with the `sourceShape` and `popoverShape` parameters of
 /// `hieloPopover` to configure the endpoints of the presentation transition.

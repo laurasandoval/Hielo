@@ -10,17 +10,21 @@ at your own risk. Handle missing symbols gracefully; symbol presence does not gu
 
 ## Invariants
 
-1. One session owns at most one presentation.
-2. Overlay and pinned modes never run at the same time.
-3. Mount a frozen snapshot before dismissing the live keyboard.
-4. Keep the snapshot mounted until restoration has completed.
-5. Restoration must continue discovering replacement keyboard windows.
-6. Every UIKit mutation must have an idempotent cleanup path.
-7. Timeouts and `cancel()` must leave the app and keyboard interactive.
-8. Do not add app-specific layout or focus policy to the package.
-9. Mount popover content once per presentation; do not measure a hidden duplicate.
-10. Every session teardown must restore the source and presentation binding;
-    callbacks from an old host must not affect a new presentation.
+1. One host owns at most one presentation.
+2. Keep the original input focused while presenting over its frozen snapshot.
+3. Every UIKit mutation must have an idempotent cleanup path.
+4. Cancellation must leave the app and keyboard interactive.
+5. Do not add app-specific layout or focus policy to the package.
+6. Mount popover content once per presentation; do not measure a hidden duplicate.
+7. Every session teardown must restore the source and presentation binding;
+   callbacks from an old host must not affect a new presentation.
+
+## Release scope
+
+The public API on main is the Hielo popover modifier family and `.hieloHost()`.
+Session/source types are internal. Keyboard pinning, restoration, and explicit
+session control are preserved on `laurasandoval--keyboard-pinning`; do not
+reintroduce them to main without an explicit scope change.
 
 ## API and maintainability
 
@@ -40,9 +44,8 @@ at your own risk. Handle missing symbols gracefully; symbol presence does not gu
 
 ## Project structure
 
-- `Sources/Hielo/Session`: public session API; `Internal` holds overlay and restoration mechanics
+- `Sources/Hielo/Session`: public host modifier and internal session; `Internal` holds overlay mechanics
 - `Sources/Hielo/Hosting`: app- and keyboard-window presentation hosts
-- `Sources/Hielo/Pinning`: pinned snapshot and restoration ownership
 - `Sources/Hielo/Popover`: public modifiers and styles; `Internal` holds UI, placement, and motion
 - `Sources/Hielo/Runtime`: private UIKit discovery and capture boundary
 - `Tests/HieloTests`: tests grouped to mirror source features

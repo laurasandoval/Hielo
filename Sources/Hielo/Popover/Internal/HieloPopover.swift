@@ -3,7 +3,7 @@ import SwiftUI
 /// A source view that expands into custom content over a frozen keyboard or app.
 ///
 /// Create this view with a `hieloPopover` view modifier.
-/// The nearest ``View/hieloHost(_:lifecycle:)`` modifier supplies the
+/// The nearest ``View/hieloHost()`` modifier supplies the
 /// keyboard-freeze session used for presentation.
 @MainActor
 struct HieloPopover<SourceContent: View, PopoverContent: View>: View {
