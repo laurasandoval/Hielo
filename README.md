@@ -25,7 +25,7 @@ over the keyboard without dismissing it.
 In Xcode, choose **File → Add Package Dependencies** and enter:
 
 ```text
-https://github.com/laurasandoval/KeyboardFreeze
+https://github.com/laurasandoval/Hielo
 ```
 
 ## Present a keyboard popover
