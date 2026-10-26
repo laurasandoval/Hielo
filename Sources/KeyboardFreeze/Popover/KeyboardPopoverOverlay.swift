@@ -9,6 +9,7 @@ struct KeyboardPopoverOverlay<SourceContent: View, PopoverContent: View>: View {
   let destinationFrame: CGRect
   let shapeTransition: KeyboardPopoverShapeTransition
   let fadesSurface: Bool
+  let animation: Animation?
   let onSourceHandoff: @MainActor () -> Void
   let onDismissed: @MainActor () -> Void
 
@@ -121,14 +122,14 @@ struct KeyboardPopoverOverlay<SourceContent: View, PopoverContent: View>: View {
     if reduceMotion {
       expansionProgress = 1
     } else {
-      withAnimation(.smooth(duration: KeyboardPopoverMotion.animationDuration)) {
+      withAnimation(reduceMotion ? nil : animation) {
         expansionProgress = 1
       }
     }
   }
 
   private func springBack() {
-    withAnimation(.smooth(duration: KeyboardPopoverMotion.animationDuration)) {
+    withAnimation(reduceMotion ? nil : animation) {
       dragOffset = .zero
     }
   }
@@ -140,13 +141,13 @@ struct KeyboardPopoverOverlay<SourceContent: View, PopoverContent: View>: View {
       isPresented = false
     }
 
-    guard !reduceMotion else {
+    guard !reduceMotion, animation != nil else {
       completeDismissal()
       return
     }
 
     withAnimation(
-      .smooth(duration: KeyboardPopoverMotion.animationDuration),
+      reduceMotion ? nil : animation,
       completionCriteria: .removed
     ) {
       expansionProgress = 0

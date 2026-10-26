@@ -16,6 +16,7 @@ struct KeyboardPopover<SourceContent: View, PopoverContent: View>: View {
   private let popoverContent: PopoverContent
 
   @Environment(\.keyboardFreezeSession) private var keyboardFreeze
+  @Environment(\.keyboardPopoverAnimation) private var animation
   @State private var source = KeyboardFreezeSource()
   @State private var sourceFrameInScreen = CGRect.zero
   @State private var destinationSize = CGSize.zero
@@ -133,6 +134,7 @@ struct KeyboardPopover<SourceContent: View, PopoverContent: View>: View {
           destinationFrame: destinationFrame(context),
           shapeTransition: shapeTransition,
           fadesSurface: sourceGlass == nil,
+          animation: animation,
           onSourceHandoff: prepareSourceHandoff,
           onDismissed: finishDismissal
         )

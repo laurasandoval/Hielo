@@ -160,3 +160,11 @@ Popovers default to a glass source. Apply `.keyboardPopoverStyle(.plain)`
 after `.keyboardPopover(...)` for an inline button without its own glass.
 The presented popover still uses glass. A style can also be inherited from
 an ancestor. Passing `sourceGlass` explicitly overrides the inherited style.
+
+### Animation
+
+Use `.keyboardPopoverAnimation(.spring(duration: 0.4, bounce: 0.2))` after the
+popover modifier or on an ancestor to customize opening, dismissal, and drag
+snap-back. The default is `.spring(duration: 0.3, bounce: 0.2)`. Pass `nil` to
+disable animation. The choice is captured at presentation time; Reduce Motion
+also disables transitions. Supply a finite animation so dismissal can complete.

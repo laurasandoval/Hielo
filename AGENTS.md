@@ -19,6 +19,22 @@ at your own risk. Preserve the fail-closed behavior when any symbol is missing.
 7. Timeouts and `cancel()` must leave the app and keyboard interactive.
 8. Do not add app-specific layout or focus policy to the package.
 
+## API and maintainability
+
+- Follow SwiftUI and UIKit conventions: native types, bindings, environment-based
+  modifiers, semantic controls, and familiar naming before custom abstractions.
+- Provide useful defaults so the common case needs little configuration. Expose
+  focused customization using Apple types such as `Animation`, rather than a
+  parallel configuration language.
+- Hide runtime complexity from consumers while keeping internal ownership,
+  coordinate spaces, state transitions, and cleanup explicit for maintainers.
+- Keep shared behavior in one implementation; isolate real style differences.
+  Prefer small, concrete components over speculative protocols or wrappers.
+- Document public APIs with concise summaries, parameter/default semantics,
+  examples, and relevant limitations. Keep demo integration visible at call sites.
+- Preserve private-runtime fail-closed behavior. Do not expand private API use
+  merely to simplify a public call site.
+
 ## Project structure
 
 - `Sources/KeyboardFreeze/Session`: public session API and state machine
@@ -39,7 +55,7 @@ required for correct cross-window placement on physical devices.
 
 ## Verification
 
-Build and run the example app on an iOS 26 Simulator, run the package test
-scheme, and follow `Documentation/Testing.md` on a physical iPhone before a
-release. Simulator success alone is not sufficient evidence for the private
-keyboard snapshot runtime.
+Use verification appropriate to the changed behavior and report precisely what
+was checked. Follow `Documentation/Testing.md` on a physical iPhone before
+release; a successful build alone does not validate private keyboard runtime
+behavior. Respect the contributor’s local instructions for test and device use.

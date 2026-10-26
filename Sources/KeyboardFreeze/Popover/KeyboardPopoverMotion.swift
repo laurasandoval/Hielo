@@ -1,7 +1,6 @@
 import Foundation
 
 enum KeyboardPopoverMotion {
-  static let animationDuration = 0.2
   static let geometrySettleDelay = Duration.milliseconds(16)
   static let surfaceFadeFraction = 0.05
   static let sourceBlurRadius = 16.0
@@ -17,6 +16,4 @@ enum KeyboardPopoverMotion {
   static let minimumDownwardDragScale = 0.9
   static let dismissalTranslation = 64.0
   static let dismissalPrediction = 120.0
-
-  static let sourceHandoffDelay = Duration.milliseconds(34)
 }
