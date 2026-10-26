@@ -13,12 +13,7 @@ struct KeyboardPopoverSurface<SourceContent: View, PopoverContent: View>: View {
   var body: some View {
     if fadesSurface {
       ZStack {
-        KeyboardPopoverExpandedLayer(
-          content: popoverContent,
-          destinationSize: destinationSize,
-          containerSize: currentSize,
-          opacity: 1
-        )
+        expandedLayer
         .frame(width: currentSize.width, height: currentSize.height)
         .clipShape(shape)
         .glassEffect(.regular.interactive(), in: shape)
@@ -29,33 +24,37 @@ struct KeyboardPopoverSurface<SourceContent: View, PopoverContent: View>: View {
           )
         )
 
-        KeyboardPopoverSourceLayer(
-          content: sourceContent,
-          sourceSize: sourceSize,
-          containerSize: currentSize,
-          expansionProgress: expansionProgress
-        )
+        sourceLayer
       }
       .frame(width: currentSize.width, height: currentSize.height)
     } else {
       ZStack {
-        KeyboardPopoverSourceLayer(
-          content: sourceContent,
-          sourceSize: sourceSize,
-          containerSize: currentSize,
-          expansionProgress: expansionProgress
-        )
+        sourceLayer
 
-        KeyboardPopoverExpandedLayer(
-          content: popoverContent,
-          destinationSize: destinationSize,
-          containerSize: currentSize,
-          opacity: expansionProgress
-        )
+        expandedLayer
       }
       .frame(width: currentSize.width, height: currentSize.height)
       .clipShape(shape)
       .glassEffect(.regular.interactive(), in: shape)
     }
   }
+
+  private var expandedLayer: some View {
+    KeyboardPopoverExpandedLayer(
+      content: popoverContent,
+      destinationSize: destinationSize,
+      containerSize: currentSize,
+      opacity: expansionProgress
+    )
+  }
+
+  private var sourceLayer: some View {
+    KeyboardPopoverSourceLayer(
+      content: sourceContent,
+      sourceSize: sourceSize,
+      containerSize: currentSize,
+      expansionProgress: expansionProgress
+    )
+  }
+
 }
