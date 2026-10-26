@@ -92,18 +92,18 @@ public final class KeyboardFreeze {
     activePin?.keyboardFrameInScreen.height ?? 0
   }
 
-  @ObservationIgnored private let configuration: Configuration
-  @ObservationIgnored private let runtime: any KeyboardFreezeRuntimeProviding
-  @ObservationIgnored private let notificationCenter: NotificationCenter
-  @ObservationIgnored private var storage = Storage.idle
-  @ObservationIgnored private var overlayDismissalTask: Task<Void, Never>?
-  @ObservationIgnored private var keyboardTransitionTask: Task<Void, Never>?
-  @ObservationIgnored private var transitionTimeoutTask: Task<Void, Never>?
-  @ObservationIgnored private var keyboardWillShowObserver: NSObjectProtocol?
-  @ObservationIgnored private var keyboardDidShowObserver: NSObjectProtocol?
-  @ObservationIgnored private var keyboardDidHideObserver: NSObjectProtocol?
-  @ObservationIgnored private var animationSuppressionID: UUID?
-  @ObservationIgnored private var animationsWereEnabledBeforeSuppression: Bool?
+  @ObservationIgnored let configuration: Configuration
+  @ObservationIgnored let runtime: any KeyboardFreezeRuntimeProviding
+  @ObservationIgnored let notificationCenter: NotificationCenter
+  @ObservationIgnored var storage = Storage.idle
+  @ObservationIgnored var overlayDismissalTask: Task<Void, Never>?
+  @ObservationIgnored var keyboardTransitionTask: Task<Void, Never>?
+  @ObservationIgnored var transitionTimeoutTask: Task<Void, Never>?
+  @ObservationIgnored var keyboardWillShowObserver: NSObjectProtocol?
+  @ObservationIgnored var keyboardDidShowObserver: NSObjectProtocol?
+  @ObservationIgnored var keyboardDidHideObserver: NSObjectProtocol?
+  @ObservationIgnored var animationSuppressionID: UUID?
+  @ObservationIgnored var animationsWereEnabledBeforeSuppression: Bool?
 
   // MARK: - Lifecycle
 
@@ -160,41 +160,6 @@ public final class KeyboardFreeze {
   ) -> KeyboardFreezeActivationResult {
     presentOverlayFromSourceErased(
       source: source,
-      overlayFrame: overlayFrame,
-      onOutsideTap: onOutsideTap,
-      content: { AnyView(content($0)) }
-    )
-  }
-
-  @discardableResult
-  func presentAdaptiveOverlay<Content: View>(
-    from source: KeyboardFreezeSource,
-    sourceFrame: CGRect,
-    overlayFrame: (Context) -> CGRect,
-    onOutsideTap: (@MainActor () -> Void)? = nil,
-    @ViewBuilder content: (Context) -> Content
-  ) -> KeyboardFreezeActivationResult {
-    guard case .idle = storage else {
-      return .blockedByActivePresentation(status)
-    }
-
-    let sourceWindowResolution = source.resolveWindow()
-    if let capture = runtime.capture() {
-      return startOverlayPresentation(
-        capture: capture,
-        sourceFrame: sourceFrame,
-        safeAreaFrameInScreen: sourceWindowResolution?.safeAreaFrameInScreen,
-        overlayFrame: overlayFrame,
-        onOutsideTap: onOutsideTap,
-        content: { AnyView(content($0)) }
-      )
-    }
-
-    guard let sourceWindowResolution else {
-      return .sourceUnavailable
-    }
-    return startScreenOverlayPresentation(
-      resolution: sourceWindowResolution,
       overlayFrame: overlayFrame,
       onOutsideTap: onOutsideTap,
       content: { AnyView(content($0)) }
@@ -369,10 +334,11 @@ public final class KeyboardFreeze {
   /// and pinned snapshots, restores window state, and returns the session to idle.
   /// It does not request input focus. Calling it on an idle session has no effect.
   public func cancel() {
-    let previousStatus = status
+    let previousStorage = storage
     cancelTasksAndObservers()
+    setStorage(.idle)
 
-    switch storage {
+    switch previousStorage {
     case .idle:
       break
     case .overlay(let presentation):
@@ -383,10 +349,6 @@ public final class KeyboardFreeze {
       .repinning(let pin, let presentation, _):
       presentation.tearDown()
       pin.snapshotView.removeFromSuperview()
-    }
-    storage = .idle
-    if previousStatus != .idle {
-      status = .idle
     }
   }
 
@@ -437,326 +399,14 @@ public final class KeyboardFreeze {
     activePin?.snapshotView
   }
 
-  // MARK: - Overlay internals
-
-  private func presentOverlayErased(
-    sourceFrame: CGRect,
-    overlayFrame: (Context) -> CGRect,
-    onOutsideTap: (@MainActor () -> Void)?,
-    content: (Context) -> AnyView
-  ) -> KeyboardFreezeActivationResult {
-    guard case .idle = storage else {
-      return .blockedByActivePresentation(status)
-    }
-    guard let capture = runtime.capture() else {
-      return .keyboardUnavailable
-    }
-    return startOverlayPresentation(
-      capture: capture,
-      sourceFrame: sourceFrame,
-      overlayFrame: overlayFrame,
-      onOutsideTap: onOutsideTap,
-      content: content
-    )
-  }
-
-  private func presentOverlayFromSourceErased(
-    source: KeyboardFreezeSource,
-    overlayFrame: (Context) -> CGRect,
-    onOutsideTap: (@MainActor () -> Void)?,
-    content: (Context) -> AnyView
-  ) -> KeyboardFreezeActivationResult {
-    guard case .idle = storage else {
-      return .blockedByActivePresentation(status)
-    }
-    guard let capture = runtime.capture() else {
-      return .keyboardUnavailable
-    }
-    guard let sourceFrame = source.resolveFrame(on: capture.keyboardWindow.screen) else {
-      return .sourceUnavailable
-    }
-
-    return startOverlayPresentation(
-      capture: capture,
-      sourceFrame: sourceFrame,
-      overlayFrame: overlayFrame,
-      onOutsideTap: onOutsideTap,
-      content: content
-    )
-  }
-
-  private func startOverlayPresentation(
-    capture: KeyboardFreezeRuntime.Capture,
-    sourceFrame: CGRect,
-    safeAreaFrameInScreen: CGRect? = nil,
-    overlayFrame: (Context) -> CGRect,
-    onOutsideTap: (@MainActor () -> Void)?,
-    content: (Context) -> AnyView
-  ) -> KeyboardFreezeActivationResult {
-    let keyboardWindow = capture.keyboardWindow
-    let outsideTapAction =
-      onOutsideTap ?? { [weak self] in
-        self?.dismissOverlay()
-      }
-    let context = Context(
-      windowBounds: keyboardWindow.bounds,
-      safeAreaBounds: safeAreaFrameInScreen.map {
-        keyboardWindow.convert($0, from: nil)
-      } ?? keyboardWindow.bounds.inset(by: keyboardWindow.safeAreaInsets),
-      keyboardFrame: capture.keyboardFrameInWindow,
-      sourceFrame: keyboardWindow.convert(sourceFrame, from: nil)
-    )
-    runtime.pauseSnapshot(capture.snapshotView)
-    let presentation = KeyboardFreezeOverlayPresentation(
-      hostWindow: keyboardWindow,
-      backgroundView: capture.snapshotView,
-      backgroundFrame: context.keyboardFrame,
-      overlayFrame: overlayFrame(context),
-      onOutsideTap: outsideTapAction,
-      content: content(context)
-    )
-    setStorage(.overlay(presentation))
-    return .started
-  }
-
-  private func startScreenOverlayPresentation(
-    resolution: KeyboardFreezeSource.WindowResolution,
-    overlayFrame: (Context) -> CGRect,
-    onOutsideTap: (@MainActor () -> Void)?,
-    content: (Context) -> AnyView
-  ) -> KeyboardFreezeActivationResult {
-    let hostWindow = resolution.window
-    let outsideTapAction =
-      onOutsideTap ?? { [weak self] in
-        self?.dismissOverlay()
-      }
-    let context = Context(
-      windowBounds: hostWindow.bounds,
-      safeAreaBounds: hostWindow.convert(resolution.safeAreaFrameInScreen, from: nil),
-      keyboardFrame: .zero,
-      sourceFrame: hostWindow.convert(resolution.frameInScreen, from: nil)
-    )
-    let presentation = KeyboardFreezeOverlayPresentation(
-      hostWindow: hostWindow,
-      overlayFrame: overlayFrame(context),
-      onOutsideTap: outsideTapAction,
-      content: content(context)
-    )
-    setStorage(.overlay(presentation))
-    return .started
-  }
-
-  private func finishOverlayPresentation(
-    _ presentation: KeyboardFreezeOverlayPresentation
-  ) {
-    guard case .overlay(let currentPresentation) = storage,
-      currentPresentation === presentation
-    else { return }
-
-    overlayDismissalTask = nil
-    presentation.tearDown()
-    setStorage(.idle)
-  }
-
-  // MARK: - Restoration internals
-
-  private func beginRestoring(
-    pin: KeyboardFreezePin,
-    focusFirstResponder: @escaping @MainActor () -> Void
-  ) {
-    keyboardTransitionTask?.cancel()
-    let presentation = KeyboardFreezeRestorationPresentation(
-      pin: pin,
-      runtime: runtime
-    )
-    setStorage(.restoring(pin, presentation))
-    installKeyboardShowObservers(for: presentation)
-    focusFirstResponder()
-
-    startTransitionTimeout(configuration.restorationTimeout) {
-      [weak self, weak presentation] in
-      guard let self, let presentation else { return }
-      finishKeyboardRestoration(presentation)
-    }
-  }
-
-  private func beginRepinning(
-    pin: KeyboardFreezePin,
-    presentation: KeyboardFreezeRestorationPresentation,
-    resignFirstResponder: @escaping @MainActor () -> Void
-  ) {
-    transitionTimeoutTask?.cancel()
-    removeKeyboardShowObservers()
-    setStorage(.repinning(pin, presentation, pendingFocus: nil))
-    installKeyboardDidHideObserver(for: presentation)
-    resignWithoutAnimationAcrossNextTurn(resignFirstResponder)
-
-    startTransitionTimeout(configuration.repinningTimeout) {
-      [weak self, weak presentation] in
-      guard let self, let presentation else { return }
-      finishRepinning(presentation)
-    }
-  }
-
-  private func finishKeyboardRestoration(
-    _ presentation: KeyboardFreezeRestorationPresentation
-  ) {
-    guard case .restoring(let pin, let currentPresentation) = storage,
-      currentPresentation === presentation
-    else { return }
-
-    transitionTimeoutTask?.cancel()
-    transitionTimeoutTask = nil
-    removeKeyboardShowObservers()
-    presentation.tearDown()
-    pin.snapshotView.removeFromSuperview()
-    setStorage(.idle)
-  }
-
-  private func finishRepinning(
-    _ presentation: KeyboardFreezeRestorationPresentation
-  ) {
-    guard case .repinning(let pin, let currentPresentation, let pendingFocus) = storage,
-      currentPresentation === presentation
-    else { return }
-
-    transitionTimeoutTask?.cancel()
-    transitionTimeoutTask = nil
-    removeKeyboardDidHideObserver()
-    presentation.tearDown()
-    setStorage(.pinned(pin))
-
-    if let pendingFocus {
-      beginRestoring(pin: pin, focusFirstResponder: pendingFocus)
-    }
-  }
-
-  // MARK: - Keyboard lifecycle
-
-  private func installKeyboardShowObservers(
-    for presentation: KeyboardFreezeRestorationPresentation
-  ) {
-    removeKeyboardShowObservers()
-    keyboardWillShowObserver = notificationCenter.addObserver(
-      forName: UIResponder.keyboardWillShowNotification,
-      object: nil,
-      queue: .main
-    ) { [weak self, weak presentation] _ in
-      Task { @MainActor in
-        guard let self, let presentation else { return }
-        guard case .restoring(_, let currentPresentation) = self.storage,
-          currentPresentation === presentation
-        else { return }
-        presentation.hideKeyboardWindows()
-      }
-    }
-    keyboardDidShowObserver = notificationCenter.addObserver(
-      forName: UIResponder.keyboardDidShowNotification,
-      object: nil,
-      queue: .main
-    ) { [weak self, weak presentation] _ in
-      Task { @MainActor in
-        guard let self, let presentation else { return }
-        self.finishKeyboardRestoration(presentation)
-      }
-    }
-  }
-
-  private func installKeyboardDidHideObserver(
-    for presentation: KeyboardFreezeRestorationPresentation
-  ) {
-    removeKeyboardDidHideObserver()
-    keyboardDidHideObserver = notificationCenter.addObserver(
-      forName: UIResponder.keyboardDidHideNotification,
-      object: nil,
-      queue: .main
-    ) { [weak self, weak presentation] _ in
-      Task { @MainActor in
-        guard let self, let presentation else { return }
-        self.finishRepinning(presentation)
-      }
-    }
-  }
-
-  private func startTransitionTimeout(
-    _ duration: Duration,
-    action: @escaping @MainActor () -> Void
-  ) {
-    transitionTimeoutTask?.cancel()
-    transitionTimeoutTask = Task { @MainActor in
-      try? await Task.sleep(for: duration)
-      guard !Task.isCancelled else { return }
-      action()
-    }
-  }
-
-  private func resignWithoutAnimationAcrossNextTurn(
-    _ resignFirstResponder: @escaping @MainActor () -> Void
-  ) {
-    keyboardTransitionTask?.cancel()
-    let suppressionID = UUID()
-    if animationSuppressionID == nil {
-      animationsWereEnabledBeforeSuppression = UIView.areAnimationsEnabled
-    }
-    animationSuppressionID = suppressionID
-    UIView.setAnimationsEnabled(false)
-    resignFirstResponder()
-
-    keyboardTransitionTask = Task { @MainActor [weak self] in
-      await Task.yield()
-      self?.finishAnimationSuppression(suppressionID)
-    }
-  }
-
-  private func finishAnimationSuppression(_ suppressionID: UUID? = nil) {
-    if let suppressionID, animationSuppressionID != suppressionID {
-      return
-    }
-    guard let animationsWereEnabledBeforeSuppression else { return }
-    UIView.setAnimationsEnabled(animationsWereEnabledBeforeSuppression)
-    animationSuppressionID = nil
-    self.animationsWereEnabledBeforeSuppression = nil
-  }
-
-  // MARK: - Cleanup
-
-  private func cancelTasksAndObservers() {
-    overlayDismissalTask?.cancel()
-    overlayDismissalTask = nil
-    keyboardTransitionTask?.cancel()
-    keyboardTransitionTask = nil
-    finishAnimationSuppression()
-    transitionTimeoutTask?.cancel()
-    transitionTimeoutTask = nil
-    removeKeyboardShowObservers()
-    removeKeyboardDidHideObserver()
-  }
-
-  private func removeKeyboardShowObservers() {
-    if let keyboardWillShowObserver {
-      notificationCenter.removeObserver(keyboardWillShowObserver)
-      self.keyboardWillShowObserver = nil
-    }
-    if let keyboardDidShowObserver {
-      notificationCenter.removeObserver(keyboardDidShowObserver)
-      self.keyboardDidShowObserver = nil
-    }
-  }
-
-  private func removeKeyboardDidHideObserver() {
-    guard let keyboardDidHideObserver else { return }
-    notificationCenter.removeObserver(keyboardDidHideObserver)
-    self.keyboardDidHideObserver = nil
-  }
-
-  private func setStorage(_ storage: Storage) {
+  func setStorage(_ storage: Storage) {
     self.storage = storage
     status = storage.status
   }
 
   // MARK: - Storage
 
-  private enum Storage {
+  enum Storage {
     case idle
     case overlay(KeyboardFreezeOverlayPresentation)
     case pinned(KeyboardFreezePin)

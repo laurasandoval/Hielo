@@ -5,9 +5,12 @@ struct KeyboardPopoverExpandedLayer<Content: View>: View {
   let destinationSize: CGSize
   let containerSize: CGSize
   let opacity: Double
+  let onSizeChange: (CGSize) -> Void
 
   var body: some View {
     content
+      .fixedSize()
+      .onGeometryChange(for: CGSize.self) { $0.size } action: { onSizeChange($0) }
       .frame(width: destinationSize.width, height: destinationSize.height)
       .scaleEffect(contentScale, anchor: .center)
       .opacity(opacity)

@@ -52,6 +52,8 @@ final class KeyboardFreezeTests: XCTestCase {
     )
 
     let result = session.presentAdaptiveOverlay(
+      id: UUID(),
+      onEnded: {},
       from: source,
       sourceFrame: owner.convert(owner.bounds, to: nil),
       overlayFrame: { _ in CGRect(x: 28, y: 558, width: 250, height: 250) },
@@ -74,6 +76,8 @@ final class KeyboardFreezeTests: XCTestCase {
     let sourceFrame = CGRect(x: 28, y: 760, width: 48, height: 48)
 
     let result = session.presentAdaptiveOverlay(
+      id: UUID(),
+      onEnded: {},
       from: KeyboardFreezeSource(),
       sourceFrame: sourceFrame,
       overlayFrame: { _ in CGRect(x: 28, y: 558, width: 250, height: 250) },

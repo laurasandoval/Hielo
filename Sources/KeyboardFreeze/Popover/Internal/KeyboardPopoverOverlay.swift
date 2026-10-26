@@ -5,15 +5,16 @@ struct KeyboardPopoverOverlay<SourceContent: View, PopoverContent: View>: View {
 
   let sourceContent: SourceContent
   let popoverContent: PopoverContent
-  let sourceFrame: CGRect
-  let destinationFrame: CGRect
+  let context: KeyboardFreeze.Context
+  let attachmentAnchor: UnitPoint
   let shapeTransition: KeyboardPopoverShapeTransition
   let fadesSurface: Bool
   let animation: Animation?
-  let onSourceHandoff: @MainActor () -> Void
+  let onFrameChange: @MainActor (CGRect) -> Void
   let onDismissed: @MainActor () -> Void
 
   @Environment(\.accessibilityReduceMotion) private var reduceMotion
+  @State private var destinationSize = CGSize.zero
   @State private var expansionProgress = 0.0
   @State private var dragOffset = CGSize.zero
   @State private var isDismissing = false
@@ -28,7 +29,8 @@ struct KeyboardPopoverOverlay<SourceContent: View, PopoverContent: View>: View {
         currentSize: currentSurfaceFrame.size,
         shape: surfaceShape,
         expansionProgress: expansionProgress,
-        fadesSurface: fadesSurface
+        fadesSurface: fadesSurface,
+        onContentSizeChange: updateContentSize
       )
       .scaleEffect(dragScale)
       .offset(dragOffset)
@@ -44,7 +46,9 @@ struct KeyboardPopoverOverlay<SourceContent: View, PopoverContent: View>: View {
       .position(surfaceCenter)
     }
     .frame(width: destinationFrame.width, height: destinationFrame.height)
-    .task {
+    .opacity(destinationSize == .zero ? 0 : 1)
+    .task(id: destinationSize == .zero) {
+      guard destinationSize != .zero, expansionProgress == 0 else { return }
       await expand()
     }
     .onChange(of: isPresented) { _, newValue in
@@ -54,6 +58,32 @@ struct KeyboardPopoverOverlay<SourceContent: View, PopoverContent: View>: View {
     }
     .accessibilityElement(children: .contain)
     .accessibilityAction(.escape, beginDismissal)
+  }
+
+  private var sourceFrame: CGRect { context.sourceFrame }
+
+  private var destinationFrame: CGRect {
+    let anchor = context.keyboardFrame.isEmpty
+      ? KeyboardPopoverPlacement.adaptiveAttachmentAnchor(
+          preferredAnchor: attachmentAnchor,
+          sourceFrame: sourceFrame,
+          availableBounds: context.safeAreaBounds
+        )
+      : attachmentAnchor
+    return KeyboardPopoverPlacement.destinationFrame(
+      sourceFrame: sourceFrame,
+      destinationSize: destinationSize,
+      attachmentAnchor: anchor,
+      availableBounds: context.safeAreaBounds
+    )
+  }
+
+  private func updateContentSize(_ size: CGSize) {
+    guard !isDismissing, size.width > 0, size.height > 0,
+      size.width.isFinite, size.height.isFinite, size != destinationSize
+    else { return }
+    destinationSize = size
+    onFrameChange(destinationFrame)
   }
 
   private var localSourceFrame: CGRect {
@@ -117,14 +147,10 @@ struct KeyboardPopoverOverlay<SourceContent: View, PopoverContent: View>: View {
 
   private func expand() async {
     await Task.yield()
-    guard !isDismissing else { return }
+    guard !Task.isCancelled, !isDismissing, isPresented else { return }
 
-    if reduceMotion {
+    withAnimation(reduceMotion ? nil : animation) {
       expansionProgress = 1
-    } else {
-      withAnimation(reduceMotion ? nil : animation) {
-        expansionProgress = 1
-      }
     }
   }
 
@@ -162,7 +188,6 @@ struct KeyboardPopoverOverlay<SourceContent: View, PopoverContent: View>: View {
     var transaction = Transaction(animation: nil)
     transaction.disablesAnimations = true
     withTransaction(transaction) {
-      onSourceHandoff()
       onDismissed()
     }
   }

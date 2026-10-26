@@ -31,6 +31,11 @@ extension View {
   /// popover appears over the app. Keep the original input focused while the
   /// popover is presented to preserve the keyboard.
   ///
+  /// Content mounts once per presentation and inherits the source's environment
+  /// at presentation time. Later ancestor environment changes aren't forwarded.
+  /// Keep state that must survive dismissal in the parent or a model, and dismiss
+  /// by setting `isPresented` to `false`.
+  ///
   /// Centered attachment components adapt toward the nearest app-window edge
   /// when no keyboard is visible.
   ///
@@ -94,6 +99,11 @@ extension View {
   /// modifiers to configure that size. When the keyboard isn’t visible, the
   /// popover appears over the app. Keep the original input focused while the
   /// popover is presented to preserve the keyboard.
+  ///
+  /// Content mounts once per presentation and inherits the source's environment
+  /// at presentation time. Later ancestor environment changes aren't forwarded.
+  /// Keep state that must survive dismissal in the parent or a model, and dismiss
+  /// by setting `isPresented` to `false`.
   ///
   /// Centered attachment components adapt toward the nearest app-window edge
   /// when no keyboard is visible.

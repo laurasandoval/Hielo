@@ -2,18 +2,26 @@ import SwiftUI
 
 @MainActor
 final class KeyboardFreezeOverlayPresentation: NSObject, UIGestureRecognizerDelegate {
+  let id: UUID
+  private var onEnded: (@MainActor () -> Void)?
   private let onOutsideTap: @MainActor () -> Void
   private let presentationView: KeyboardFreezePresentationView
+  private var appInteractionShield: UIControl?
   private let hostingController: UIHostingController<AnyView>
 
   init(
+    id: UUID = UUID(),
+    onEnded: (@MainActor () -> Void)? = nil,
     hostWindow: UIWindow,
+    sourceWindow: UIWindow? = nil,
     backgroundView: UIView? = nil,
     backgroundFrame: CGRect = .zero,
     overlayFrame: CGRect,
     onOutsideTap: @escaping @MainActor () -> Void,
     content: AnyView
   ) {
+    self.id = id
+    self.onEnded = onEnded
     self.onOutsideTap = onOutsideTap
     presentationView = KeyboardFreezePresentationView(onDismiss: onOutsideTap)
     hostingController = UIHostingController(rootView: content)
@@ -37,10 +45,29 @@ final class KeyboardFreezeOverlayPresentation: NSObject, UIGestureRecognizerDele
 
     presentationView.addGestureRecognizer(makeOutsideTapRecognizer())
     hostWindow.addSubview(presentationView)
+
+    // The keyboard host cannot intercept taps on the app's navigation controls.
+    if let sourceWindow, sourceWindow !== hostWindow {
+      let shield = UIControl(frame: sourceWindow.bounds)
+      shield.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+      shield.accessibilityElementsHidden = true
+      shield.addTarget(self, action: #selector(handleAppOutsideTap), for: .touchUpInside)
+      sourceWindow.addSubview(shield)
+      appInteractionShield = shield
+    }
   }
 
   func tearDown() {
+    appInteractionShield?.removeFromSuperview()
+    appInteractionShield = nil
     presentationView.removeFromSuperview()
+    let completion = onEnded
+    onEnded = nil
+    completion?()
+  }
+
+  func updateFrame(_ frame: CGRect) {
+    hostingController.view.frame = frame
   }
 
   func notifyOutsideTap() {
@@ -53,6 +80,10 @@ final class KeyboardFreezeOverlayPresentation: NSObject, UIGestureRecognizerDele
   ) -> Bool {
     let location = touch.location(in: hostingController.view)
     return !hostingController.view.point(inside: location, with: nil)
+  }
+
+  @objc private func handleAppOutsideTap() {
+    notifyOutsideTap()
   }
 
   @objc private func handleOutsideTap(_: UITapGestureRecognizer) {

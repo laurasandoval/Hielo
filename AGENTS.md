@@ -6,7 +6,7 @@ dependencies.
 
 The package uses three private UIKit mechanisms—remote keyboard-window lookup,
 input host-view lookup, and keyboard view snapshotting—lightly obfuscated. Use
-at your own risk. Preserve the fail-closed behavior when any symbol is missing.
+at your own risk. Handle missing symbols gracefully; symbol presence does not guarantee runtime safety.
 
 ## Invariants
 
@@ -18,6 +18,9 @@ at your own risk. Preserve the fail-closed behavior when any symbol is missing.
 6. Every UIKit mutation must have an idempotent cleanup path.
 7. Timeouts and `cancel()` must leave the app and keyboard interactive.
 8. Do not add app-specific layout or focus policy to the package.
+9. Mount popover content once per presentation; do not measure a hidden duplicate.
+10. Every session teardown must restore the source and presentation binding;
+    callbacks from an old host must not affect a new presentation.
 
 ## API and maintainability
 
@@ -37,10 +40,10 @@ at your own risk. Preserve the fail-closed behavior when any symbol is missing.
 
 ## Project structure
 
-- `Sources/KeyboardFreeze/Session`: public session API and state machine
+- `Sources/KeyboardFreeze/Session`: public session API; `Internal` holds overlay and restoration mechanics
 - `Sources/KeyboardFreeze/Hosting`: app- and keyboard-window presentation hosts
 - `Sources/KeyboardFreeze/Pinning`: pinned snapshot and restoration ownership
-- `Sources/KeyboardFreeze/Popover`: morphing popover UI, placement, and motion
+- `Sources/KeyboardFreeze/Popover`: public modifiers and styles; `Internal` holds UI, placement, and motion
 - `Sources/KeyboardFreeze/Runtime`: private UIKit discovery and capture boundary
 - `Tests/KeyboardFreezeTests`: tests grouped to mirror source features
 - `Examples/KeyboardFreezeDemo`: the iOS demonstration app

@@ -15,13 +15,16 @@ struct KeyboardPopover<SourceContent: View, PopoverContent: View>: View {
   private let sourceContent: SourceContent
   private let popoverContent: PopoverContent
 
+  @Environment(\.self) private var environment
   @Environment(\.keyboardFreezeSession) private var keyboardFreeze
   @Environment(\.keyboardPopoverAnimation) private var animation
   @State private var source = KeyboardFreezeSource()
   @State private var sourceFrameInScreen = CGRect.zero
-  @State private var destinationSize = CGSize.zero
-  @State private var isHosted = false
+  @State private var presentationID: UUID?
+
   @State private var presentationTask: Task<Void, Never>?
+
+  private var isHosted: Bool { presentationID != nil }
 
   init(
     isPresented: Binding<Bool>,
@@ -59,19 +62,6 @@ struct KeyboardPopover<SourceContent: View, PopoverContent: View>: View {
     }
     .keyboardFreezeSource(source)
     .accessibilityHidden(isHosted)
-    .background {
-      popoverContent
-        .fixedSize()
-        .hidden()
-        .accessibilityHidden(true)
-        .allowsHitTesting(false)
-        .onGeometryChange(for: CGSize.self) { proxy in
-          proxy.size
-        } action: { newSize in
-          destinationSize = newSize
-          presentIfReady()
-        }
-    }
     .onChange(of: source.frameInScreen) {
       // UIKit identifies the source's app window while SwiftUI supplies screen
       // coordinates that stay correct when the overlay crosses window boundaries.
@@ -106,72 +96,48 @@ struct KeyboardPopover<SourceContent: View, PopoverContent: View>: View {
   }
 
   private func presentIfReady() {
-    guard
-      KeyboardPopoverPresentationReadiness.canPresent(
-        isPresented: isPresented,
-        isHosted: isHosted,
-        resolvedSourceFrame: source.frameInScreen,
-        measuredSourceFrame: sourceFrameInScreen,
-        destinationSize: destinationSize
-      )
-    else { return }
+    guard isPresented, !isHosted, !sourceFrameInScreen.isEmpty else { return }
     guard let keyboardFreeze else {
       isPresented = false
       return
     }
 
+    let id = UUID()
+    presentationID = id
+    source.onDetach = { [weak keyboardFreeze] in
+      Task { @MainActor in
+        keyboardFreeze?.dismissOverlay(id: id)
+      }
+    }
     let result = keyboardFreeze.presentAdaptiveOverlay(
+      id: id,
+      onEnded: { presentationEnded(id: id) },
       from: source,
       sourceFrame: sourceFrameInScreen,
-      overlayFrame: destinationFrame,
+      overlayFrame: { $0.sourceFrame },
       onOutsideTap: requestDismissal,
       content: { context in
         KeyboardPopoverOverlay(
           isPresented: $isPresented,
           sourceContent: sourceContent,
           popoverContent: popoverContent,
-          sourceFrame: context.sourceFrame,
-          destinationFrame: destinationFrame(context),
+          context: context,
+          attachmentAnchor: attachmentAnchor,
           shapeTransition: shapeTransition,
           fadesSurface: sourceGlass == nil,
           animation: animation,
-          onSourceHandoff: prepareSourceHandoff,
-          onDismissed: finishDismissal
+          onFrameChange: { keyboardFreeze.updateOverlayFrame($0, id: id) },
+          onDismissed: { keyboardFreeze.dismissOverlay(id: id) }
         )
+        .environment(\.self, environment)
       }
     )
 
-    if result.succeeded {
-      presentationTask?.cancel()
-      presentationTask = nil
-      isHosted = true
-    } else {
-      presentationTask?.cancel()
-      presentationTask = nil
-      isPresented = false
+    presentationTask?.cancel()
+    presentationTask = nil
+    if !result.succeeded {
+      presentationEnded(id: id)
     }
-  }
-
-  private func destinationFrame(
-    _ context: KeyboardFreeze.Context
-  ) -> CGRect {
-    let resolvedAnchor =
-      if context.keyboardFrame.isEmpty {
-        KeyboardPopoverPlacement.adaptiveAttachmentAnchor(
-          preferredAnchor: attachmentAnchor,
-          sourceFrame: context.sourceFrame,
-          availableBounds: context.safeAreaBounds
-        )
-      } else {
-        attachmentAnchor
-      }
-
-    return KeyboardPopoverPlacement.destinationFrame(
-      sourceFrame: context.sourceFrame,
-      destinationSize: destinationSize,
-      attachmentAnchor: resolvedAnchor,
-      availableBounds: context.safeAreaBounds
-    )
   }
 
   private var sourceSize: CGSize {
@@ -182,26 +148,24 @@ struct KeyboardPopover<SourceContent: View, PopoverContent: View>: View {
     isPresented = false
   }
 
-  private func prepareSourceHandoff() {
-    var transaction = Transaction()
-    transaction.disablesAnimations = true
-    withTransaction(transaction) {
-      isHosted = false
-    }
-  }
-
-  private func finishDismissal() {
+  private func presentationEnded(id: UUID) {
+    guard presentationID == id else { return }
+    source.onDetach = nil
     presentationTask?.cancel()
     presentationTask = nil
-    keyboardFreeze?.dismissOverlay()
-    isHosted = false
+    var transaction = Transaction(animation: nil)
+    transaction.disablesAnimations = true
+    withTransaction(transaction) {
+      presentationID = nil
+      isPresented = false
+    }
   }
 
   private func tearDown() {
     presentationTask?.cancel()
     presentationTask = nil
-    guard isHosted else { return }
-    keyboardFreeze?.dismissOverlay()
-    isHosted = false
+    guard let id = presentationID else { return }
+    keyboardFreeze?.dismissOverlay(id: id)
+    presentationEnded(id: id)
   }
 }

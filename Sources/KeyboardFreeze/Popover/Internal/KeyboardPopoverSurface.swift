@@ -9,6 +9,7 @@ struct KeyboardPopoverSurface<SourceContent: View, PopoverContent: View>: View {
   let shape: UnevenRoundedRectangle
   let expansionProgress: Double
   let fadesSurface: Bool
+  let onContentSizeChange: (CGSize) -> Void
 
   var body: some View {
     if fadesSurface {
@@ -44,7 +45,8 @@ struct KeyboardPopoverSurface<SourceContent: View, PopoverContent: View>: View {
       content: popoverContent,
       destinationSize: destinationSize,
       containerSize: currentSize,
-      opacity: expansionProgress
+      opacity: expansionProgress,
+      onSizeChange: onContentSizeChange
     )
   }
 

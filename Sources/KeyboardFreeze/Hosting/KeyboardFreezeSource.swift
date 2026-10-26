@@ -18,6 +18,8 @@ public final class KeyboardFreezeSource {
   /// The tracked view’s frame in screen coordinates, or `nil` when unavailable.
   public private(set) var frameInScreen: CGRect?
 
+  @ObservationIgnored var onDetach: (@MainActor () -> Void)?
+
   @ObservationIgnored private var screen: UIScreen?
   @ObservationIgnored private weak var owner: UIView?
 
@@ -54,5 +56,8 @@ public final class KeyboardFreezeSource {
     self.owner = nil
     screen = nil
     frameInScreen = nil
+    let action = onDetach
+    onDetach = nil
+    action?()
   }
 }

@@ -112,14 +112,22 @@ available safe area without changing its natural size. Content larger than the
 safe area pins to its leading or top edge. KeyboardFreeze never resizes the
 consumer's view to prevent overflow.
 
+Popover content mounts once per presentation, so its local state resets when
+reopened. Keep persistent state in the parent or a model. The source's environment
+is copied when the popover opens; later ancestor environment changes are not
+forwarded automatically. Use bindings or observable models for changing data,
+and set `isPresented` to `false` to dismiss.
+
 For fully custom presentations, `presentOverlay` and `KeyboardFreezeSource`
-remain available as lower-level APIs.
+remain available as lower-level APIs. Supply environment dependencies explicitly
+when creating content through these imperative methods.
 
 ## Failure handling
 
 Low-level keyboard-presentation methods return `KeyboardFreezeActivationResult`.
-A missing or changed private runtime returns `.keyboardUnavailable` and leaves
-the live keyboard alone. `keyboardPopover` falls back to the app window when a
+When required keyboard resources cannot be resolved, activation returns
+`.keyboardUnavailable` and leaves the live keyboard alone. These checks are
+best-effort: an incompatible private implementation can still fail at runtime. `keyboardPopover` falls back to the app window when a
 keyboard capture is unavailable and fails closed only when it cannot resolve
 its source or host.
 
@@ -146,7 +154,7 @@ The app in `Examples/KeyboardFreezeDemo` consumes the local package in
 - `Demos/Messages/MessagesDemoView.swift`: minimal integration with a separate glass button.
 - `Demos/ChatGPT/ChatGPTDemoView.swift`: integration with an inline plain button.
 - Each demo owns its menu, presentation state, and keyboard focus.
-- `Helpers`: shared composer layout, button styling, and menu rows/items.
+- `Helpers`: shared composer layout and button styling. Menu types stay in their demo.
 
 Paths above are relative to `Examples/KeyboardFreezeDemo/KeyboardFreezeDemo`.
 

@@ -34,6 +34,23 @@ physical iPhone.
 - Dismiss and reopen repeatedly.
 - Repeat with the emoji keyboard, including during scroll momentum.
 
+## Content lifetime and cancellation
+
+- Supply a custom environment value and an environment object above the source;
+  confirm content receives both when opened.
+- Confirm content `onAppear`/`task` runs only for the presented tree, and local
+  state resets on reopening. Bind model state if it must survive dismissal.
+- Begin with empty content that later loads; confirm outside taps still dismiss
+  while waiting and the menu expands when a finite size becomes available.
+- Call `cancel()` or `dismissOverlay()` during opening and while expanded;
+  confirm the binding resets, source returns, and reopening works.
+- With a menu open, tap Back: confirm only the menu dismisses. Tap Back again
+  and confirm navigation proceeds. Repeat with and without keyboard focus.
+- Navigate programmatically during opening or collapse; confirm no menu or
+  shield remains.
+- Change content size while expanded and confirm placement and outside taps
+  follow its new frame.
+
 ## Additional conditions
 
 - Predictive text enabled and disabled
@@ -43,6 +60,7 @@ physical iPhone.
 - Background and foreground during each active state
 - Rotation and multitasking where the consuming app supports them
 
-Missing private runtime support should produce `.keyboardUnavailable`, never a
-crash, transparent interaction shield, hidden keyboard window, or disabled
-UIKit animation state.
+Missing runtime symbols should produce `.keyboardUnavailable` and release any
+interaction shields, hidden keyboard windows, and animation suppression.
+Existing private symbols may still have incompatible implementations on a new OS;
+the symbol checks alone cannot rule out a runtime crash.
