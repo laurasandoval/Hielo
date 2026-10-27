@@ -1,0 +1,2 @@
+// Optional machine-local signing settings for the demo app.
+#include? "Signing.local.xcconfig"

@@ -146,6 +146,10 @@ Open `Examples/HieloDemo/HieloDemo.xcodeproj` to run the
 minimal morphing glass-menu example. Keyboard snapshot behavior must also be
 verified on a physical iPhone because Simulator keyboard windows can differ.
 
+For device builds, create `Examples/HieloDemo/Signing.local.xcconfig` with
+`DEVELOPMENT_TEAM = YOUR_TEAM_ID`. This file is ignored by Git and is loaded
+for both Debug and Release. Simulator builds do not require it.
+
 ## License
 
 Hielo is available under the MIT License.

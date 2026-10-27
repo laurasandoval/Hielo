@@ -4,3 +4,6 @@
 DerivedData/
 xcuserdata/
 *.xcuserstate
+
+# Local demo signing identity
+/Examples/HieloDemo/Signing.local.xcconfig
