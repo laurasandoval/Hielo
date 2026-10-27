@@ -22,8 +22,8 @@ struct MessagesDemoView: View {
       VStack {
         Spacer()
 
-        DemoComposer(text: $text, focus: $inputIsFocused, accessory: {
-          DemoComposerButton {
+        DemoComposer(text: $text, focus: $inputIsFocused, height: 42, spacing: 10, accessory: {
+          DemoComposerButton(size: 42) {
             isMenuPresented = true
           }
           .hieloPopover(
@@ -36,7 +36,7 @@ struct MessagesDemoView: View {
           }
           .hieloPopoverStyle(.glass)
         })
-        .padding(inputIsFocused ? 16 : 28)
+        .padding(inputIsFocused ? 15 : 27)
         .animation(.smooth(duration: 0.2), value: inputIsFocused)
       }
     }
