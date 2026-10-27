@@ -1,4 +1,7 @@
-# Hielo
+<p align="center">
+  <img src=".github/Hielo-Icon.png" alt="Hielo app icon" width="128" height="128">
+</p>
+<h1 align="center">Hielo</h1>
 
 Present morphing Liquid Glass popovers anywhere, including over a frozen iOS
 system keyboard.
