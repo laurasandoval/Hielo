@@ -11,6 +11,7 @@ struct MessagesDemoView: View {
   @State private var isMenuPresented = false
   @State private var isPhotoPickerPresented = false
   @State private var showsPhotoPickerAfterMenu = false
+  @State private var photoPickerAwaitsKeyboardHide = false
   @State private var composerHold: CGFloat = 0
   @State private var photoSelection: PhotosPickerItem?
   @State private var keyboard = HieloKeyboardHeight()
@@ -85,13 +86,21 @@ struct MessagesDemoView: View {
         }
         .ignoresSafeArea(.keyboard)
     }
-    .onHieloKeyboardHeightChange { keyboard = $0 }
+    .onHieloKeyboardHeightChange {
+      keyboard = $0
+      // The keyboard has started sliding away; the sheet rises into its place.
+      guard photoPickerAwaitsKeyboardHide, $0.current == 0 else { return }
+      photoPickerAwaitsKeyboardHide = false
+      isPhotoPickerPresented = true
+    }
     .onChange(of: inputIsFocused) { _, isFocused in
       // Tapping the text field trades the sheet for the keyboard.
-      if isFocused { isPhotoPickerPresented = false }
+      guard isFocused else { return }
+      isPhotoPickerPresented = false
+      photoPickerAwaitsKeyboardHide = false
     }
-    .task(id: isPhotoPickerPresented) {
-      guard !isPhotoPickerPresented, composerHold > 0 else { return }
+    .task(id: [isPhotoPickerPresented, photoPickerAwaitsKeyboardHide]) {
+      guard !isPhotoPickerPresented, !photoPickerAwaitsKeyboardHide, composerHold > 0 else { return }
       // Returning to the text field: keep the composer's space until the
       // keyboard has taken it over. If no keyboard arrives (a hardware
       // keyboard, or the sheet was swiped away), the composer settles down.
@@ -118,14 +127,18 @@ struct MessagesDemoView: View {
   }
 
   /// Trades the keyboard for the photo picker after the popover has morphed
-  /// back into its source. A sheet can't appear above the live keyboard, so
-  /// focus drops as the sheet rises into the keyboard's place.
+  /// back into its source. The composer holds its place while the keyboard
+  /// slides away, and the sheet follows once the keyboard has hidden.
   private func showPhotoPickerIfRequested() {
     guard showsPhotoPickerAfterMenu else { return }
     showsPhotoPickerAfterMenu = false
     composerHold = keyboardHeight
-    inputIsFocused = false
-    isPhotoPickerPresented = true
+    if keyboard.current > 0 {
+      photoPickerAwaitsKeyboardHide = true
+      inputIsFocused = false
+    } else {
+      isPhotoPickerPresented = true
+    }
   }
 }
 
