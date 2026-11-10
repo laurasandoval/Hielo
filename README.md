@@ -8,13 +8,33 @@ system keyboard.
 
 Hielo is designed for interactions such as glass menus that open
 over the keyboard without dismissing it. It also provides a public-API-only
-utility for reading the keyboard's height.
+utility for reading the keyboard's height, for example to put a sheet exactly
+where the keyboard was.
 
-<p align="center">
-  <img src=".github/media/popover-keyboard.gif" alt="A glass popover opening over the frozen keyboard in a messaging composer, then being dragged down to dismiss it" width="280">
-  &nbsp;&nbsp;
-  <img src=".github/media/photos-sheet.gif" alt="A Photos sheet presented at the height of the keyboard, with the message composer staying above it" width="280">
-</p>
+<table align="center">
+  <tr>
+    <td align="center">
+      <img src=".github/media/popover-keyboard.gif" alt="A glass popover opening from the plus button over the frozen keyboard, its other rows fading when one is tapped, then being dragged down to dismiss it" width="280">
+    </td>
+    <td align="center">
+      <img src=".github/media/photos-sheet.gif" alt="Tapping Photos collapses the popover and presents a photo picker sheet at the keyboard's height while the composer stays in place; tapping the text field brings the keyboard back" width="280">
+    </td>
+  </tr>
+  <tr>
+    <td align="center"><code>hieloPopover</code> over the keyboard</td>
+    <td align="center"><code>onHieloKeyboardHeightChange</code> sizing a sheet</td>
+  </tr>
+</table>
+
+Both recordings are the example app running in Simulator.
+
+| API | Purpose |
+| --- | --- |
+| `.hieloHost()` | Hosts popovers for a page. |
+| `.hieloPopover(isPresented:attachmentAnchor:sourceShape:popoverShape:onDismiss:content:)` | Presents a morphing glass popover from a source view. A second overload adds `sourceGlass:`. |
+| `.hieloPopoverStyle(_:)` | Chooses a `.glass` (default) or `.plain` source. |
+| `.hieloPopoverAnimation(_:)` | Sets the opening, dismissal, and snap-back animation. |
+| `.onHieloKeyboardHeightChange(_:)` | Reports `HieloKeyboardHeight` (`current`, `lastVisible`). Public API only. |
 
 > [!WARNING]
 > Presenting a popover over the keyboard uses private UIKit: remote
@@ -149,6 +169,10 @@ back, such as presenting a sheet, pass `onDismiss`, as with SwiftUI's `sheet`:
 }
 ```
 
+`onDismiss` runs once per dismissal, however the popover was dismissed. A
+popover presented over the keyboard also ends if the keyboard is dismissed
+underneath it, for example when focus is cleared programmatically.
+
 ## Popover styles
 
 Popovers default to a glass source. Apply `.hieloPopoverStyle(.plain)`
@@ -179,46 +203,67 @@ also disables transitions. Supply a finite animation so dismissal can complete.
 
 `onHieloKeyboardHeightChange` reports the height of the docked software
 keyboard. It is independent of the popover runtime and uses only public API
-(UIKit's `keyboardLayoutGuide`). Latch the value in `@State`; `lastVisible`
-keeps the last nonzero height after the keyboard is dismissed, which is useful
-for sizing a sheet to replace the keyboard:
+(UIKit's `keyboardLayoutGuide`), so it is safe to ship on its own.
+
+`HieloKeyboardHeight` has two values: `current`, which is `0` when no docked
+keyboard is showing, and `lastVisible`, which keeps the last nonzero height
+after the keyboard is dismissed. Store the value in `@State` and use
+`lastVisible` to size whatever replaces the keyboard:
 
 ```swift
 struct ChatView: View {
   @State private var keyboard = HieloKeyboardHeight()
+  @State private var isMenuPresented = false
   @State private var isPhotosPresented = false
+  @FocusState private var inputIsFocused: Bool
   let bottomInset: CGFloat  // the window's bottom safe-area inset
 
   var body: some View {
-    MessageList()
-      .safeAreaInset(edge: .bottom) {
-        Composer()
-          .padding(.bottom, isPhotosPresented ? keyboard.lastVisible : 0)
-      }
-      .onHieloKeyboardHeightChange { keyboard = $0 }
-      .sheet(isPresented: $isPhotosPresented) {
-        PhotosView()
-          // Detents are measured inside the sheet's safe area.
-          .presentationDetents([.height(keyboard.lastVisible - bottomInset), .large])
-      }
+    Composer(focus: $inputIsFocused) {
+      Button("Open menu", systemImage: "plus") { isMenuPresented = true }
+        .hieloPopover(isPresented: $isMenuPresented, onDismiss: showPhotos) {
+          Menu()
+        }
+    }
+    .onHieloKeyboardHeightChange { keyboard = $0 }
+    .sheet(isPresented: $isPhotosPresented) {
+      PhotosView()
+        // Detents are measured inside the sheet's safe area.
+        .presentationDetents([.height(keyboard.lastVisible - bottomInset), .large])
+    }
+    .hieloHost()
+  }
+
+  // A sheet can't appear above the live keyboard, so trade one for the other.
+  private func showPhotos() {
+    inputIsFocused = false
+    isPhotosPresented = true
   }
 }
 ```
 
 Heights are in points and measure the keyboard's overlap with the bottom of the
-window, including the bottom safe area it covers; subtract the bottom safe-area
-inset for layout that already respects the safe area, such as an edge-attached
-sheet detent. Floating, undocked, and split keyboards report `0`, and with a
-hardware keyboard only the docked shortcuts bar, if shown, reports an overlap.
-The callback runs once per change, not per animation frame, except during
-interactive dismissal, where it follows the keyboard.
+window, including the bottom safe area it covers. Subtract the bottom safe-area
+inset for layout that already respects the safe area, such as a sheet detent.
+`lastVisible` is `0` until a keyboard has appeared, so supply a fallback height
+for that case.
+
+Floating, undocked, and split keyboards report `0`, and with a hardware
+keyboard only the docked shortcuts bar, if shown, reports an overlap. The
+action runs when the value changes, with the keyboard's target height, not once
+per animation frame; animate dependent layout yourself.
+
+To keep a composer exactly where it sat above the keyboard while a sheet takes
+the keyboard's place, drive its bottom inset from one value in both states.
+`MessagesDemoView` in the example app shows the full pattern.
 
 ## Release scope
 
 The first release exposes `.hieloPopover`, `.hieloPopoverStyle`,
 `.hieloPopoverAnimation`, and `.hieloHost()`, with `HieloPopoverStyle` and
 `HieloPopoverShape` for customization, and `onHieloKeyboardHeightChange` with
-`HieloKeyboardHeight`. Session and source machinery are internal.
+`HieloKeyboardHeight`. Session and source machinery are internal. See
+[CHANGELOG.md](CHANGELOG.md) for what each release contains.
 
 The explicit `HieloSession` API for keyboard pinning, restoration, and custom
 overlays is preserved on `laurasandoval--keyboard-pinning`. It is not part of
@@ -227,11 +272,13 @@ this branch's public API.
 ## Example app
 
 Open `Examples/HieloDemo/HieloDemo.xcodeproj` to run the Messages demo: a
-morphing glass menu over the keyboard. Tapping Photos in the menu dismisses the
-popover and presents a sheet sized to the keyboard's height, with an inline
-`PhotosPicker` and the composer staying above it. Keyboard snapshot behavior
-must also be verified on a physical iPhone because Simulator keyboard windows
-can differ.
+morphing glass menu over the keyboard. Photos is the one working row; tapping
+any other row fades the rest out and back in as a hint. Tapping Photos
+collapses the popover, then presents a sheet sized to the keyboard's height
+with an inline `PhotosPicker`, which needs no photo-library permission. The
+composer stays in place as the sheet replaces the keyboard, and tapping the
+text field brings the keyboard back. Keyboard snapshot behavior must also be
+verified on a physical iPhone because Simulator keyboard windows can differ.
 
 For device builds, create `Examples/HieloDemo/Signing.local.xcconfig` with
 `DEVELOPMENT_TEAM = YOUR_TEAM_ID`. This file is ignored by Git and is loaded
@@ -244,7 +291,9 @@ The app in `Examples/HieloDemo` consumes the local package in
 
 - `App/DemoAppView.swift`: the demo's entry view.
 - `Demos/Messages/MessagesDemoView.swift`: integration with a separate glass
-  button, the Photos sheet, and keyboard-height latching.
+  button, `onDismiss` sequencing, the Photos sheet, and the keyboard height
+  that sizes the sheet and holds the composer in place.
+- `Demos/Messages/MessagesDemoPhotoPicker.swift`: the inline photo picker.
 - `Demos/Messages/MessagesDemoMenu.swift`: the menu content, including the
   fade that hints at Photos when another row is tapped.
 - `Helpers`: shared composer layout and button styling.
