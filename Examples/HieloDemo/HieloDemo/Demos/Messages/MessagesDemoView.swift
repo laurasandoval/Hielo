@@ -11,6 +11,7 @@ struct MessagesDemoView: View {
   @State private var isMenuPresented = false
   @State private var isPhotoPickerPresented = false
   @State private var showsPhotoPickerAfterMenu = false
+  @State private var composerHold: CGFloat = 0
   @State private var photoSelection: PhotosPickerItem?
   @State private var keyboard = HieloKeyboardHeight()
   @State private var bottomSafeAreaInset: CGFloat = 0
@@ -27,45 +28,53 @@ struct MessagesDemoView: View {
     .height(keyboardHeight - bottomSafeAreaInset)
   }
 
+  /// The composer's distance from the window bottom: the system's keyboard
+  /// inset, or the height held for the photo picker, whichever is larger. One
+  /// value drives both states, so trading the keyboard for the sheet (and
+  /// back) never moves the composer.
+  private func composerBottomInset(systemInset: CGFloat) -> CGFloat {
+    let inset = max(systemInset, composerHold)
+    return inset > bottomSafeAreaInset ? inset : 0
+  }
+
   var body: some View {
-    ZStack {
-      Rectangle()
-        .fill(.background)
-        .ignoresSafeArea()
+    // Read above the safe-area-ignoring content so the inset includes the keyboard.
+    GeometryReader { proxy in
+      let bottomInset = composerBottomInset(systemInset: proxy.safeAreaInsets.bottom)
 
-      ScrollView {
-        Color.clear.frame(height: 1)
-      }
-      .contentShape(.rect)
-      .onTapGesture { inputIsFocused = false }
-      .scrollDismissesKeyboard(.interactively)
+      ZStack {
+        Rectangle()
+          .fill(.background)
 
-      VStack {
-        Spacer()
-
-        DemoComposer(text: $text, focus: $inputIsFocused) {
-          DemoComposerButton {
-            isMenuPresented = true
-          }
-          .hieloPopover(
-            isPresented: $isMenuPresented,
-            attachmentAnchor: .leading,
-            onDismiss: showPhotoPickerIfRequested
-          ) {
-            MessagesDemoMenu(onSelectPhotos: requestPhotoPicker)
-          }
-          .hieloPopoverStyle(.glass)
+        ScrollView {
+          Color.clear.frame(height: 1)
         }
-        .padding(inputIsFocused || isPhotoPickerPresented ? 15 : 27)
-        // While the sheet replaces the keyboard, hold the composer where it
-        // sat above the keyboard.
-        .padding(.bottom, isPhotoPickerPresented ? keyboardHeight : 0)
-        .animation(.smooth(duration: 0.2), value: inputIsFocused)
-        .animation(.smooth(duration: 0.2), value: isPhotoPickerPresented)
+        .contentShape(.rect)
+        .onTapGesture { inputIsFocused = false }
+        .scrollDismissesKeyboard(.interactively)
+
+        VStack {
+          Spacer()
+
+          DemoComposer(text: $text, focus: $inputIsFocused) {
+            DemoComposerButton {
+              isMenuPresented = true
+            }
+            .hieloPopover(
+              isPresented: $isMenuPresented,
+              attachmentAnchor: .leading,
+              onDismiss: showPhotoPickerIfRequested
+            ) {
+              MessagesDemoMenu(onSelectPhotos: requestPhotoPicker)
+            }
+            .hieloPopoverStyle(.glass)
+          }
+          .padding(bottomInset > 0 ? 15 : 27)
+          .padding(.bottom, bottomInset)
+        }
       }
-      .ignoresSafeArea(isPhotoPickerPresented ? .keyboard : [], edges: .bottom)
+      .ignoresSafeArea(.all, edges: .bottom)
     }
-    .ignoresSafeArea(.container, edges: .bottom)
     .background {
       // Read inside the keyboard-ignoring region so the inset excludes the keyboard.
       Color.clear
@@ -80,6 +89,17 @@ struct MessagesDemoView: View {
     .onChange(of: inputIsFocused) { _, isFocused in
       // Tapping the text field trades the sheet for the keyboard.
       if isFocused { isPhotoPickerPresented = false }
+    }
+    .task(id: isPhotoPickerPresented) {
+      guard !isPhotoPickerPresented, composerHold > 0 else { return }
+      // Returning to the text field: keep the composer's space until the
+      // keyboard has taken it over. If no keyboard arrives (a hardware
+      // keyboard, or the sheet was swiped away), the composer settles down.
+      if inputIsFocused {
+        try? await Task.sleep(for: .milliseconds(600))
+        guard !Task.isCancelled else { return }
+      }
+      withAnimation(.smooth(duration: 0.25)) { composerHold = 0 }
     }
     .sheet(isPresented: $isPhotoPickerPresented) {
       MessagesDemoPhotoPicker(selection: $photoSelection)
@@ -103,6 +123,7 @@ struct MessagesDemoView: View {
   private func showPhotoPickerIfRequested() {
     guard showsPhotoPickerAfterMenu else { return }
     showsPhotoPickerAfterMenu = false
+    composerHold = keyboardHeight
     inputIsFocused = false
     isPhotoPickerPresented = true
   }
