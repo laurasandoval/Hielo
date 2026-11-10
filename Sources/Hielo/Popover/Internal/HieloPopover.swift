@@ -4,7 +4,7 @@ import SwiftUI
 ///
 /// Create this view with a `hieloPopover` view modifier.
 /// The nearest ``View/hieloHost()`` modifier supplies the
-/// keyboard-freeze session used for presentation.
+/// session used for presentation.
 @MainActor
 struct HieloPopover<SourceContent: View, PopoverContent: View>: View {
   @Binding private var isPresented: Bool
@@ -12,6 +12,7 @@ struct HieloPopover<SourceContent: View, PopoverContent: View>: View {
   private let attachmentAnchor: UnitPoint
   private let sourceGlass: Glass?
   private let shapeTransition: HieloPopoverShapeTransition
+  private let onDismiss: (() -> Void)?
   private let sourceContent: SourceContent
   private let popoverContent: PopoverContent
 
@@ -32,12 +33,14 @@ struct HieloPopover<SourceContent: View, PopoverContent: View>: View {
     sourceGlass: Glass? = .regular.interactive(),
     sourceShape: HieloPopoverShape = .capsule,
     popoverShape: HieloPopoverShape = .rect(cornerRadius: 32),
+    onDismiss: (() -> Void)? = nil,
     @ViewBuilder source: () -> SourceContent,
     @ViewBuilder content: () -> PopoverContent
   ) {
     _isPresented = isPresented
     self.attachmentAnchor = attachmentAnchor
     self.sourceGlass = sourceGlass
+    self.onDismiss = onDismiss
     shapeTransition = HieloPopoverShapeTransition(
       sourceShape: sourceShape,
       popoverShape: popoverShape
@@ -159,6 +162,7 @@ struct HieloPopover<SourceContent: View, PopoverContent: View>: View {
       presentationID = nil
       isPresented = false
     }
+    onDismiss?()
   }
 
   private func tearDown() {
