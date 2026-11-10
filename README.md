@@ -7,11 +7,21 @@ Present morphing Liquid Glass popovers anywhere, including over a frozen iOS
 system keyboard.
 
 Hielo is designed for interactions such as glass menus that open
-over the keyboard without dismissing it.
+over the keyboard without dismissing it. It also provides a public-API-only
+utility for reading the keyboard's height.
 
-> Hielo uses three private UIKit mechanisms—remote keyboard-window
-> lookup, input host-view lookup, and keyboard view snapshotting—lightly
-> obfuscated. Use at your own risk.
+<p align="center">
+  <img src=".github/media/popover-keyboard.gif" alt="A glass popover opening over the frozen keyboard in a messaging composer, then being dragged down to dismiss it" width="280">
+  &nbsp;&nbsp;
+  <img src=".github/media/photos-sheet.gif" alt="A Photos sheet presented at the height of the keyboard, with the message composer staying above it" width="280">
+</p>
+
+> [!WARNING]
+> Presenting a popover over the keyboard uses private UIKit: remote
+> keyboard-window lookup, input host-view lookup, and keyboard view
+> snapshotting, lightly obfuscated. An app that ships it may be rejected by App
+> Review, and it can break in any iOS update. Use at your own risk. The
+> keyboard-height utility (`onHieloKeyboardHeightChange`) uses only public API.
 
 ## Requirements
 
@@ -130,11 +140,85 @@ If the source or host cannot be resolved, the presentation binding resets to
 `false`. Private-runtime checks are best-effort: an incompatible implementation
 can still fail at runtime.
 
+To run something after the popover has finished dismissing and its source is
+back, such as presenting a sheet, pass `onDismiss`, as with SwiftUI's `sheet`:
+
+```swift
+.hieloPopover(isPresented: $isMenuPresented, onDismiss: showPhotos) {
+  MenuContent()
+}
+```
+
+## Popover styles
+
+Popovers default to a glass source. Apply `.hieloPopoverStyle(.plain)`
+after `.hieloPopover(...)` for an inline button without its own glass.
+The presented popover still uses glass. A style can also be inherited from
+an ancestor. Passing `sourceGlass` explicitly overrides the inherited style.
+
+```swift
+Button("Attach", systemImage: "paperclip") {
+  isMenuPresented = true
+}
+.hieloPopover(isPresented: $isMenuPresented) {
+  AttachMenu()
+    .frame(width: 240, height: 280)
+}
+.hieloPopoverStyle(.plain)
+```
+
+## Animation
+
+Use `.hieloPopoverAnimation(.spring(duration: 0.4, bounce: 0.2))` after the
+popover modifier or on an ancestor to customize opening, dismissal, and drag
+snap-back. The default is `.spring(duration: 0.3, bounce: 0.2)`. Pass `nil` to
+disable animation. The choice is captured at presentation time; Reduce Motion
+also disables transitions. Supply a finite animation so dismissal can complete.
+
+## Keyboard height
+
+`onHieloKeyboardHeightChange` reports the height of the docked software
+keyboard. It is independent of the popover runtime and uses only public API
+(UIKit's `keyboardLayoutGuide`). Latch the value in `@State`; `lastVisible`
+keeps the last nonzero height after the keyboard is dismissed, which is useful
+for sizing a sheet to replace the keyboard:
+
+```swift
+struct ChatView: View {
+  @State private var keyboard = HieloKeyboardHeight()
+  @State private var isPhotosPresented = false
+  let bottomInset: CGFloat  // the window's bottom safe-area inset
+
+  var body: some View {
+    MessageList()
+      .safeAreaInset(edge: .bottom) {
+        Composer()
+          .padding(.bottom, isPhotosPresented ? keyboard.lastVisible : 0)
+      }
+      .onHieloKeyboardHeightChange { keyboard = $0 }
+      .sheet(isPresented: $isPhotosPresented) {
+        PhotosView()
+          // Detents are measured inside the sheet's safe area.
+          .presentationDetents([.height(keyboard.lastVisible - bottomInset), .large])
+      }
+  }
+}
+```
+
+Heights are in points and measure the keyboard's overlap with the bottom of the
+window, including the bottom safe area it covers; subtract the bottom safe-area
+inset for layout that already respects the safe area, such as an edge-attached
+sheet detent. Floating, undocked, and split keyboards report `0`, and with a
+hardware keyboard only the docked shortcuts bar, if shown, reports an overlap.
+The callback runs once per change, not per animation frame, except during
+interactive dismissal, where it follows the keyboard.
+
 ## Release scope
 
 The first release exposes `.hieloPopover`, `.hieloPopoverStyle`,
 `.hieloPopoverAnimation`, and `.hieloHost()`, with `HieloPopoverStyle` and
-`HieloPopoverShape` for customization. Session and source machinery are internal.
+`HieloPopoverShape` for customization, and `onHieloKeyboardHeightChange` with
+`HieloKeyboardHeight`. Session and source machinery are internal.
 
 The explicit `HieloSession` API for keyboard pinning, restoration, and custom
 overlays is preserved on `laurasandoval--keyboard-pinning`. It is not part of
@@ -142,42 +226,35 @@ this branch's public API.
 
 ## Example app
 
-Open `Examples/HieloDemo/HieloDemo.xcodeproj` to run the
-minimal morphing glass-menu example. Keyboard snapshot behavior must also be
-verified on a physical iPhone because Simulator keyboard windows can differ.
+Open `Examples/HieloDemo/HieloDemo.xcodeproj` to run the Messages demo: a
+morphing glass menu over the keyboard. Tapping Photos in the menu dismisses the
+popover and presents a sheet sized to the keyboard's height, with an inline
+`PhotosPicker` and the composer staying above it. Keyboard snapshot behavior
+must also be verified on a physical iPhone because Simulator keyboard windows
+can differ.
 
 For device builds, create `Examples/HieloDemo/Signing.local.xcconfig` with
 `DEVELOPMENT_TEAM = YOUR_TEAM_ID`. This file is ignored by Git and is loaded
 for both Debug and Release. Simulator builds do not require it.
-
-## License
-
-Hielo is available under the MIT License.
 
 ### Reading the demo code
 
 The app in `Examples/HieloDemo` consumes the local package in
 `Sources/Hielo`; demo helpers are not part of the package.
 
-- `App/DemoAppView.swift`: navigation between the two demos.
-- `Demos/Messages/MessagesDemoView.swift`: minimal integration with a separate glass button.
-- `Demos/ChatGPT/ChatGPTDemoView.swift`: integration with an inline plain button.
-- Each demo owns its menu, presentation state, and keyboard focus.
-- `Helpers`: shared composer layout and button styling. Menu types stay in their demo.
+- `App/DemoAppView.swift`: the demo's entry view.
+- `Demos/Messages/MessagesDemoView.swift`: integration with a separate glass
+  button, the Photos sheet, and keyboard-height latching.
+- `Demos/Messages/MessagesDemoMenu.swift`: the menu content, including the
+  dimmed rows that hint at Photos.
+- `Helpers`: shared composer layout and button styling.
 
 Paths above are relative to `Examples/HieloDemo/HieloDemo`.
 
-### Popover styles
+## License
 
-Popovers default to a glass source. Apply `.hieloPopoverStyle(.plain)`
-after `.hieloPopover(...)` for an inline button without its own glass.
-The presented popover still uses glass. A style can also be inherited from
-an ancestor. Passing `sourceGlass` explicitly overrides the inherited style.
+Hielo is available under the MIT License.
 
-### Animation
-
-Use `.hieloPopoverAnimation(.spring(duration: 0.4, bounce: 0.2))` after the
-popover modifier or on an ancestor to customize opening, dismissal, and drag
-snap-back. The default is `.spring(duration: 0.3, bounce: 0.2)`. Pass `nil` to
-disable animation. The choice is captured at presentation time; Reduce Motion
-also disables transitions. Supply a finite animation so dismissal can complete.
+The Messages icons and artwork used in the demo app are the property of Apple
+and are included for demonstration only. They are not covered by the MIT
+license.

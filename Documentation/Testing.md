@@ -5,7 +5,8 @@ physical iPhone.
 
 ## Overlay
 
-- With no text field focused, open both the leading and trailing menus.
+- With no text field focused, open the menu from sources at the leading and
+  trailing edges.
 - Confirm bottom controls resolve to bottom-leading and bottom-trailing so each
   menu grows into the available screen space.
 - Move a source to the top half of a test screen and confirm a centered vertical
@@ -15,7 +16,7 @@ physical iPhone.
   area edge while preserving its natural height.
 - Present content wider than the screen; confirm it shifts to the leading safe
   area edge without resizing and lets the consumer's view overflow naturally.
-- Focus the text field and reopen both menus.
+- Focus the text field and reopen the menus.
 - Confirm the cursor remains focused and blinking.
 - Confirm the menu is leading-aligned and vertically centered on its source.
 - Confirm the source remains centered while it blurs and fades away.
@@ -34,6 +35,28 @@ physical iPhone.
 - Dismiss and reopen repeatedly.
 - Repeat with the emoji keyboard, including during scroll momentum.
 
+## Keyboard height and Photos sheet
+
+Use the demo's Messages screen on a physical iPhone.
+
+- Log or display `HieloKeyboardHeight` and confirm `current` and `lastVisible`
+  update when the keyboard shows and hides, and that `lastVisible` persists
+  after hiding.
+- Dismiss the keyboard interactively and confirm `current` follows it.
+- Repeat with different keyboards and heights: predictive text on and off,
+  emoji, and a third-party keyboard.
+- Rotate and confirm the value updates for the new window size.
+- Open the Photos sheet and confirm its detent top lines up with where the
+  keyboard's top edge was, with no gap or overlap.
+- Confirm the composer stays above the sheet at the keyboard's position.
+- Return from the sheet to the keyboard and confirm the composer does not jump.
+- Attach a hardware keyboard and confirm `current` reports the shortcuts bar
+  overlap, or `0` when there is none; confirm the sheet still gets a usable
+  height from `lastVisible` or a sensible fallback.
+- With floating and split keyboards (iPad), confirm `current` is `0`.
+- In the Messages menu, confirm the other rows dim to hint at Photos and
+  that tapping Photos dismisses the popover and presents the sheet.
+
 ## Content lifetime and cancellation
 
 - Supply a custom environment value and an environment object above the source;
@@ -50,6 +73,9 @@ physical iPhone.
   shield remains.
 - Change content size while expanded and confirm placement and outside taps
   follow its new frame.
+- Drop focus programmatically while a popover is open over the keyboard;
+  confirm the popover ends, the source returns, and no shield remains.
+- Confirm `onDismiss` runs once per dismissal, after the source is restored.
 
 ## Additional conditions
 
