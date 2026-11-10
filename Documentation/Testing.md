@@ -54,8 +54,12 @@ Use the demo's Messages screen on a physical iPhone.
   overlap, or `0` when there is none; confirm the sheet still gets a usable
   height from `lastVisible` or a sensible fallback.
 - With floating and split keyboards (iPad), confirm `current` is `0`.
-- In the Messages menu, confirm the other rows dim to hint at Photos and
-  that tapping Photos dismisses the popover and presents the sheet.
+- In the Messages menu, tap a row other than Photos; confirm the other rows
+  fade out and back in while the menu stays open, and that tapping Photos
+  dismisses the popover and presents the sheet.
+- Record the Photos sheet opening, returning to the keyboard from the text
+  field, and being swiped away; step through it and confirm the composer never
+  moves except to settle down after a swipe.
 
 ## Content lifetime and cancellation
 

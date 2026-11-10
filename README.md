@@ -246,7 +246,7 @@ The app in `Examples/HieloDemo` consumes the local package in
 - `Demos/Messages/MessagesDemoView.swift`: integration with a separate glass
   button, the Photos sheet, and keyboard-height latching.
 - `Demos/Messages/MessagesDemoMenu.swift`: the menu content, including the
-  dimmed rows that hint at Photos.
+  fade that hints at Photos when another row is tapped.
 - `Helpers`: shared composer layout and button styling.
 
 Paths above are relative to `Examples/HieloDemo/HieloDemo`.
