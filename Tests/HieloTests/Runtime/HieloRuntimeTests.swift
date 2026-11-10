@@ -6,10 +6,6 @@ import XCTest
 final class HieloRuntimeTests: XCTestCase {
   func testPrivateSymbolAssembly() {
     XCTAssertEqual(
-      HieloRuntime.remoteKeyboardWindowClassName,
-      "UIRemoteKeyboardWindow"
-    )
-    XCTAssertEqual(
       HieloRuntime.keyboardSceneDelegateSelectorName,
       "keyboardSceneDelegate"
     )

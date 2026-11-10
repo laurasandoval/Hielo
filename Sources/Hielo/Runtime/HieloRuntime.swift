@@ -12,10 +12,6 @@ enum HieloRuntime {
     let keyboardHostView: UIView
     let snapshotView: UIView
 
-    var keyboardFrameInScreen: CGRect {
-      keyboardHostView.convert(keyboardHostView.bounds, to: nil)
-    }
-
     var keyboardFrameInWindow: CGRect {
       keyboardHostView.convert(keyboardHostView.bounds, to: keyboardWindow)
     }
@@ -78,34 +74,6 @@ enum HieloRuntime {
       }
   }
 
-  static func keyboardWindows(on screen: UIScreen) -> [UIWindow] {
-    var windows: [UIWindow] = []
-    for scene in UIApplication.shared.connectedScenes.compactMap({ $0 as? UIWindowScene }) {
-      guard let window = keyboardWindow(for: scene),
-        scene.screen === screen || window.screen === screen,
-        !windows.contains(where: { $0 === window })
-      else { continue }
-      windows.append(window)
-    }
-
-    let keyboardWindowClasses = [
-      NSClassFromString(remoteKeyboardWindowClassName),
-      NSClassFromString(textEffectsWindowClassName),
-    ].compactMap { $0 }
-    let sceneWindows = UIApplication.shared.connectedScenes
-      .compactMap { $0 as? UIWindowScene }
-      .filter { $0.screen === screen }
-      .flatMap(\.windows)
-
-    for window in sceneWindows
-    where keyboardWindowClasses.contains(where: { window.isKind(of: $0) }) {
-      if !windows.contains(where: { $0 === window }) {
-        windows.append(window)
-      }
-    }
-    return windows
-  }
-
   static func keyboardHostView(in window: UIView) -> UIView? {
     firstDescendant(of: window, named: inputSetHostViewClassName)
   }
@@ -162,9 +130,6 @@ enum HieloRuntime {
     snapshotView.layer.timeOffset = pausedTime
   }
 
-  static let remoteKeyboardWindowClassName =
-    assembled(["Window", "Keyboard", "Remote", "UI"])
-
   static let keyboardSceneDelegateSelectorName =
     assembled(["Delegate", "Scene", "keyboard"])
 
@@ -192,9 +157,11 @@ enum HieloRuntime {
 
   // The screen-based factory traps for clients linked against the iOS 27 SDK.
   static func keyboardWindow(for scene: NSObject) -> UIWindow? {
-    guard let delegate = objectValue(
-      for: NSSelectorFromString(keyboardSceneDelegateSelectorName), on: scene
-    ) else { return nil }
+    guard
+      let delegate = objectValue(
+        for: NSSelectorFromString(keyboardSceneDelegateSelectorName), on: scene
+      )
+    else { return nil }
     return objectValue(
       for: NSSelectorFromString(keyboardWindowSelectorName), on: delegate
     ) as? UIWindow

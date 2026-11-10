@@ -16,7 +16,6 @@ final class HieloTests: XCTestCase {
     window.addSubview(owner)
     source.update(
       frameInScreen: owner.convert(owner.bounds, to: nil),
-      screen: window.screen,
       owner: owner
     )
 

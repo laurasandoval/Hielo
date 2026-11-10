@@ -2,12 +2,10 @@ import Observation
 import UIKit
 
 /// Tracks a SwiftUI view that overlay content can animate from or position around.
+///
+/// Attach a source to a view with `hieloSource(_:)` before presenting an overlay from it.
 @MainActor
 @Observable
-/// A source view’s location for positioning a keyboard overlay.
-///
-/// Create a source and attach it to a view with
-/// ``View/hieloSource(_:)`` before presenting an overlay from it.
 final class HieloSource {
   struct WindowResolution {
     let frameInScreen: CGRect
@@ -20,16 +18,10 @@ final class HieloSource {
 
   @ObservationIgnored var onDetach: (@MainActor () -> Void)?
 
-  @ObservationIgnored private var screen: UIScreen?
   @ObservationIgnored private weak var owner: UIView?
 
   /// Creates a source that has not yet been attached to a view.
   init() {}
-
-  func resolveFrame(on expectedScreen: UIScreen) -> CGRect? {
-    guard screen === expectedScreen else { return nil }
-    return frameInScreen
-  }
 
   func resolveWindow() -> WindowResolution? {
     guard let frameInScreen, let window = owner?.window else { return nil }
@@ -44,17 +36,15 @@ final class HieloSource {
     )
   }
 
-  func update(frameInScreen: CGRect, screen: UIScreen, owner: UIView) {
+  func update(frameInScreen: CGRect, owner: UIView) {
     guard !frameInScreen.isEmpty else { return }
     self.owner = owner
-    self.screen = screen
     self.frameInScreen = frameInScreen
   }
 
   func clear(owner: UIView) {
     guard self.owner === owner else { return }
     self.owner = nil
-    screen = nil
     frameInScreen = nil
     let action = onDetach
     onDetach = nil
