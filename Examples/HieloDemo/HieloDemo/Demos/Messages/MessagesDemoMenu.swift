@@ -5,7 +5,6 @@ import SwiftUI
 struct MessagesDemoMenu: View {
   let onSelectPhotos: () -> Void
 
-  @Environment(\.accessibilityReduceMotion) private var reduceMotion
   @State private var dimsUnavailableRows = false
 
   private let items: [(title: String, asset: String)] = [
@@ -66,21 +65,15 @@ struct MessagesDemoMenu: View {
     }
     .frame(width: 300, height: 450)
     .scrollIndicators(.hidden)
-    .onAppear(perform: playUnavailableHint)
   }
 
-  /// Restores the unavailable rows to full opacity, then fades them back to
-  /// dimmed. With Reduce Motion, the rows dim without animating.
+  /// Fades the unavailable rows out, then back in.
   private func playUnavailableHint() {
-    guard !reduceMotion else {
+    withAnimation(.easeInOut(duration: 0.35)) {
       dimsUnavailableRows = true
-      return
-    }
-    withAnimation(.easeOut(duration: 0.15)) {
-      dimsUnavailableRows = false
     } completion: {
-      withAnimation(.easeInOut(duration: 0.5)) {
-        dimsUnavailableRows = true
+      withAnimation(.easeInOut(duration: 0.45)) {
+        dimsUnavailableRows = false
       }
     }
   }
