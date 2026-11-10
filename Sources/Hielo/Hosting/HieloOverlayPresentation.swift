@@ -8,6 +8,10 @@ final class HieloOverlayPresentation: NSObject, UIGestureRecognizerDelegate {
   private let presentationView: HieloPresentationView
   private var appInteractionShield: UIControl?
   private let hostingController: UIHostingController<AnyView>
+  private var keyboardHideObserver: (any NSObjectProtocol)?
+
+  /// Called when the keyboard that hosts this presentation is dismissed.
+  var onKeyboardDismissed: (@MainActor () -> Void)?
 
   init(
     id: UUID = UUID(),
@@ -37,6 +41,18 @@ final class HieloOverlayPresentation: NSObject, UIGestureRecognizerDelegate {
       backgroundView.isUserInteractionEnabled = false
       backgroundView.accessibilityElementsHidden = true
       presentationView.addSubview(backgroundView)
+
+      // The keyboard window stops rendering once its keyboard is gone, so an
+      // in-flight collapse animation there may never report completion.
+      keyboardHideObserver = NotificationCenter.default.addObserver(
+        forName: UIResponder.keyboardDidHideNotification,
+        object: nil,
+        queue: .main
+      ) { [weak self] _ in
+        MainActor.assumeIsolated {
+          self?.onKeyboardDismissed?()
+        }
+      }
     }
 
     hostingController.view.backgroundColor = .clear
@@ -58,6 +74,11 @@ final class HieloOverlayPresentation: NSObject, UIGestureRecognizerDelegate {
   }
 
   func tearDown() {
+    if let keyboardHideObserver {
+      NotificationCenter.default.removeObserver(keyboardHideObserver)
+      self.keyboardHideObserver = nil
+    }
+    onKeyboardDismissed = nil
     appInteractionShield?.removeFromSuperview()
     appInteractionShield = nil
     presentationView.removeFromSuperview()

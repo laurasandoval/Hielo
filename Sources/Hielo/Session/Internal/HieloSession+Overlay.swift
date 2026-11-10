@@ -72,15 +72,20 @@ extension HieloSession {
       id: id,
       onEnded: onEnded,
       hostWindow: keyboardWindow,
-      sourceWindow: sourceWindow ?? keyboardWindow.windowScene?.windows.first {
-        $0 !== keyboardWindow && $0.isKeyWindow
-      },
+      sourceWindow: sourceWindow
+        ?? keyboardWindow.windowScene?.windows.first {
+          $0 !== keyboardWindow && $0.isKeyWindow
+        },
       backgroundView: capture.snapshotView,
       backgroundFrame: context.keyboardFrame,
       overlayFrame: overlayFrame(context),
       onOutsideTap: outsideTapAction,
       content: content(context)
     )
+    presentation.onKeyboardDismissed = { [weak self, weak presentation] in
+      guard let presentation else { return }
+      self?.finishOverlayPresentation(presentation)
+    }
     setStorage(.overlay(presentation))
     return .started
   }
