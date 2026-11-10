@@ -15,15 +15,15 @@ struct HieloPopoverSurface<SourceContent: View, PopoverContent: View>: View {
     if fadesSurface {
       ZStack {
         expandedLayer
-        .frame(width: currentSize.width, height: currentSize.height)
-        .clipShape(shape)
-        .glassEffect(.regular.interactive(), in: shape)
-        .modifier(
-          HieloPopoverSurfaceOpacityModifier(
-            progress: expansionProgress,
-            fadeFraction: HieloPopoverMotion.surfaceFadeFraction
+          .frame(width: currentSize.width, height: currentSize.height)
+          .clipShape(shape)
+          .glassEffect(.regular.interactive(), in: shape)
+          .modifier(
+            HieloPopoverSurfaceOpacityModifier(
+              progress: expansionProgress,
+              fadeFraction: HieloPopoverMotion.surfaceFadeFraction
+            )
           )
-        )
 
         sourceLayer
       }

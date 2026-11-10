@@ -63,12 +63,13 @@ struct HieloPopoverOverlay<SourceContent: View, PopoverContent: View>: View {
   private var sourceFrame: CGRect { context.sourceFrame }
 
   private var destinationFrame: CGRect {
-    let anchor = context.keyboardFrame.isEmpty
+    let anchor =
+      context.keyboardFrame.isEmpty
       ? HieloPopoverPlacement.adaptiveAttachmentAnchor(
-          preferredAnchor: attachmentAnchor,
-          sourceFrame: sourceFrame,
-          availableBounds: context.safeAreaBounds
-        )
+        preferredAnchor: attachmentAnchor,
+        sourceFrame: sourceFrame,
+        availableBounds: context.safeAreaBounds
+      )
       : attachmentAnchor
     return HieloPopoverPlacement.destinationFrame(
       sourceFrame: sourceFrame,

@@ -11,7 +11,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - name: Lint Swift
-        run: xcrun swift-format lint --recursive Sources Tests Examples
+        run: xcrun swift-format lint --strict --recursive Sources Tests Examples
       - name: Select simulator
         run: |
           simulator_id="$(xcrun simctl list devices available -j | jq -r \
