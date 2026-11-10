@@ -23,11 +23,11 @@ struct DemoRow: View {
   }
 }
 
-#Preview("ChatGPT") {
+#Preview("Messages") {
   DemoRow(
-    title: "ChatGPT",
-    subtitle: "Inline popover button",
-    imageName: "AppIcon-ChatGPT"
+    title: "Messages",
+    subtitle: "Glass popover and photo picker",
+    imageName: "AppIcon-Messages"
   )
   .padding()
 }

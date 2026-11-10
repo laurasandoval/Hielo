@@ -1,7 +1,6 @@
 import SwiftUI
 
 struct DemoComposerButton: View {
-  var size: CGFloat = 48
   let action: () -> Void
 
   var body: some View {
@@ -9,7 +8,7 @@ struct DemoComposerButton: View {
       .labelStyle(.iconOnly)
       .font(.title3)
       .foregroundStyle(.primary)
-      .frame(width: size, height: size)
+      .frame(width: 42, height: 42)
       .contentShape(.circle)
       .buttonStyle(.plain)
   }
