@@ -5,7 +5,7 @@ import XCTest
 @testable import Hielo
 
 @MainActor
-final class HieloTests: XCTestCase {
+final class HieloSessionOverlayTests: XCTestCase {
   func testAdaptiveOverlayUsesSourceWindowWithoutKeyboard() {
     let runtime = FakeHieloRuntime()
     let session = makeSession(runtime: runtime)

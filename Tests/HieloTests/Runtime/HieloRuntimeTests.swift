@@ -26,9 +26,4 @@ final class HieloRuntimeTests: XCTestCase {
       "snapshotView"
     )
   }
-
-  func testActivationResultSuccess() {
-    XCTAssertTrue(HieloActivationResult.started.succeeded)
-    XCTAssertFalse(HieloActivationResult.sourceUnavailable.succeeded)
-  }
 }
