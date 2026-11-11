@@ -33,3 +33,17 @@ public struct HieloKeyboardHeight: Equatable, Sendable {
     self.lastVisible = lastVisible
   }
 }
+
+extension HieloKeyboardHeight {
+  /// Records the keyboard layout guide's measured overlap with the window bottom.
+  ///
+  /// Without a docked keyboard, the guide rests on the bottom safe area, so an
+  /// overlap no larger than the inset counts as no keyboard.
+  mutating func update(overlap: CGFloat, bottomSafeAreaInset: CGFloat) {
+    let isDocked = overlap - bottomSafeAreaInset > 0.5
+    current = isDocked ? overlap : 0
+    if isDocked {
+      lastVisible = overlap
+    }
+  }
+}

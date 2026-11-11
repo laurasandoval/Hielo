@@ -68,12 +68,7 @@ struct HieloKeyboardHeightReader: UIViewRepresentable {
       guard let window else { return }
       let guideFrame = convert(keyboardLayoutGuide.layoutFrame, to: window)
       let overlap = min(max(window.bounds.maxY - guideFrame.minY, 0), window.bounds.height)
-      // Without a docked keyboard, the guide rests on the bottom safe area.
-      let isDocked = overlap - window.safeAreaInsets.bottom > 0.5
-      height.current = isDocked ? overlap : 0
-      if isDocked {
-        height.lastVisible = overlap
-      }
+      height.update(overlap: overlap, bottomSafeAreaInset: window.safeAreaInsets.bottom)
       scheduleDelivery()
     }
 

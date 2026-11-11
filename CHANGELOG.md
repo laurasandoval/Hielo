@@ -18,4 +18,4 @@ All notable changes to Hielo will be documented here.
   and `lastVisible` heights.
 - Messages demo app with a glass-menu popover over the keyboard and a Photos
   sheet sized to the keyboard's height.
-- State-machine, placement, drag behavior, shape, and runtime tests.
+- State-machine, placement, drag behavior, shape, keyboard-height, and runtime tests.
