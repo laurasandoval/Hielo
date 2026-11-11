@@ -242,9 +242,10 @@ struct ChatView: View {
 }
 ```
 
-Heights are in points and measure the keyboard's overlap with the bottom of the
-window, including the bottom safe area it covers. Subtract the bottom safe-area
-inset for layout that already respects the safe area, such as a sheet detent.
+Heights are in points and are the keyboard's full height, measured from the
+bottom edge of the window. The keyboard covers the bottom safe area, but a
+sheet detent is measured above it, so subtract the bottom safe-area inset to
+size a sheet that should match the keyboard.
 `lastVisible` is `0` until a keyboard has appeared, so supply a fallback height
 for that case.
 
@@ -264,10 +265,6 @@ The first release exposes `.hieloPopover`, `.hieloPopoverStyle`,
 `HieloPopoverShape` for customization, and `onHieloKeyboardHeightChange` with
 `HieloKeyboardHeight`. Session and source machinery are internal. See
 [CHANGELOG.md](CHANGELOG.md) for what each release contains.
-
-The explicit `HieloSession` API for keyboard pinning, restoration, and custom
-overlays is preserved on `laurasandoval--keyboard-pinning`. It is not part of
-this branch's public API.
 
 ## Example app
 

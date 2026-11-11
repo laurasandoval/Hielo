@@ -23,9 +23,13 @@ at your own risk. Handle missing symbols gracefully; symbol presence does not gu
 
 The public API on main is the Hielo popover modifier family, `.hieloHost()`, and
 the keyboard-height utility `onHieloKeyboardHeightChange` with
-`HieloKeyboardHeight`. Session/source types are internal. Keyboard pinning, restoration, and explicit
-session control are preserved on `laurasandoval--keyboard-pinning`; do not
-reintroduce them to main without an explicit scope change.
+`HieloKeyboardHeight`. Session/source types are internal. Keyboard pinning,
+restoration, and explicit session control are out of scope; do not introduce
+them to main without an explicit scope change.
+
+`HieloKeyboardHeight` reports the keyboard's full height from the window's
+bottom edge. The keyboard covers the bottom safe area, so layout measured above
+it, such as a sheet detent, subtracts the bottom safe-area inset.
 
 ## API and maintainability
 

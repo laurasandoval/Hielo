@@ -19,5 +19,3 @@ All notable changes to Hielo will be documented here.
 - Messages demo app with a glass-menu popover over the keyboard and a Photos
   sheet sized to the keyboard's height.
 - State-machine, placement, drag behavior, shape, and runtime tests.
-- Preserve explicit sessions and keyboard pinning on
-  `laurasandoval--keyboard-pinning`.

@@ -4,9 +4,6 @@ Each `.hieloHost()` owns an internal `@MainActor` session. The session manages
 one popover presentation at a time: `idle → overlay → idle`. Consumers use
 bindings and modifiers; the session and source resolver are implementation details.
 
-Keyboard pinning and restoration are preserved on
-`laurasandoval--keyboard-pinning`, outside the first release's API and runtime.
-
 ## Overlay presentation
 
 When a keyboard is visible, the runtime captures and pauses its snapshot. A
