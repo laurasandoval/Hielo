@@ -100,7 +100,9 @@ struct MessagesDemoView: View {
       photoPickerAwaitsKeyboardHide = false
     }
     .task(id: [isPhotoPickerPresented, photoPickerAwaitsKeyboardHide]) {
-      guard !isPhotoPickerPresented, !photoPickerAwaitsKeyboardHide, composerHold > 0 else { return }
+      guard !isPhotoPickerPresented, !photoPickerAwaitsKeyboardHide, composerHold > 0 else {
+        return
+      }
       // Returning to the text field: keep the composer's space until the
       // keyboard has taken it over. If no keyboard arrives (a hardware
       // keyboard, or the sheet was swiped away), the composer settles down.
