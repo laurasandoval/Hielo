@@ -51,7 +51,7 @@ it, such as a sheet detent, subtracts the bottom safe-area inset.
 
 - `Sources/Hielo/Session`: public host modifier and internal session; `Internal` holds overlay mechanics
 - `Sources/Hielo/Hosting`: app- and keyboard-window presentation hosts
-- `Sources/Hielo/Popover`: public modifiers and styles; `Internal` holds UI, placement, and motion
+- `Sources/Hielo/Popover`: public modifiers and shapes; `Internal` holds UI, placement, and motion
 - `Sources/Hielo/Keyboard`: public keyboard-height utility; public API only (`keyboardLayoutGuide`) and must never depend on `Runtime` or other private UIKit
 - `Sources/Hielo/Runtime`: private UIKit discovery and capture boundary
 - `Tests/HieloTests`: tests grouped to mirror source features

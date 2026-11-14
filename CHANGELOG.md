@@ -6,9 +6,9 @@ All notable changes to Hielo will be documented here.
 
 ## 0.1.0
 
-- Morphing Liquid Glass popovers with `.hieloHost()`, `.hieloPopover`,
-  `.hieloPopoverStyle`, and `.hieloPopoverAnimation`, with custom source and
-  destination shapes, and an optional `onDismiss` action.
+- Morphing Liquid Glass popovers with `.hieloHost()`, `.hieloPopover`, and
+  `.hieloPopoverAnimation`, with a configurable source glass, custom source
+  and destination shapes, and an optional `onDismiss` action.
 - Popovers present over the frozen system keyboard while the input stays
   focused, using private UIKit. Missing runtime support falls back to the app
   window.

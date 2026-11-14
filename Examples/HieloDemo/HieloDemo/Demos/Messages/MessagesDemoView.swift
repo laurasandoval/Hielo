@@ -68,7 +68,6 @@ struct MessagesDemoView: View {
             ) {
               MessagesDemoMenu(onSelectPhotos: requestPhotoPicker)
             }
-            .hieloPopoverStyle(.glass)
           }
           .padding(bottomInset > 0 ? 15 : 27)
           .padding(.bottom, bottomInset)
