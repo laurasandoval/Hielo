@@ -4,7 +4,7 @@ All notable changes to Hielo will be documented here.
 
 ## Unreleased
 
-## 0.1.0
+## 0.1.0 - 2026-11-13
 
 - Morphing Liquid Glass popovers with `.hieloHost()`, `.hieloPopover`, and
   `.hieloPopoverAnimation`, with a configurable source glass, custom source
