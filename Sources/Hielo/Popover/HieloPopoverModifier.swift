@@ -50,6 +50,8 @@ extension View {
   ///   - sourceShape: The source shape. The default is a capsule.
   ///   - popoverShape: The presented shape. The default is a continuously rounded
   ///     rectangle with a corner radius of 32 points.
+  ///   - onDismiss: An action to perform after the popover finishes dismissing
+  ///     and its source is restored. The default is `nil`.
   ///   - content: A closure that creates the popover’s content.
   /// - Returns: A view that presents the popover when `isPresented` is `true`.
   public func hieloPopover<PopoverContent: View>(
@@ -57,6 +59,7 @@ extension View {
     attachmentAnchor: UnitPoint = .leading,
     sourceShape: HieloPopoverShape = .capsule,
     popoverShape: HieloPopoverShape = .rect(cornerRadius: 32),
+    onDismiss: (() -> Void)? = nil,
     @ViewBuilder content: () -> PopoverContent
   ) -> some View {
     StyledHieloPopover(
@@ -64,6 +67,7 @@ extension View {
       attachmentAnchor: attachmentAnchor,
       sourceShape: sourceShape,
       popoverShape: popoverShape,
+      onDismiss: onDismiss,
       source: self,
       content: content()
     )
@@ -117,6 +121,8 @@ extension View {
   ///   - sourceShape: The source shape. The default is a capsule.
   ///   - popoverShape: The presented shape. The default is a continuously rounded
   ///     rectangle with a corner radius of 32 points.
+  ///   - onDismiss: An action to perform after the popover finishes dismissing
+  ///     and its source is restored. The default is `nil`.
   ///   - content: A closure that creates the popover’s content.
   /// - Returns: A view that presents the popover when `isPresented` is `true`.
   public func hieloPopover<PopoverContent: View>(
@@ -125,6 +131,7 @@ extension View {
     sourceGlass: Glass?,
     sourceShape: HieloPopoverShape = .capsule,
     popoverShape: HieloPopoverShape = .rect(cornerRadius: 32),
+    onDismiss: (() -> Void)? = nil,
     @ViewBuilder content: () -> PopoverContent
   ) -> some View {
     HieloPopover(
@@ -133,6 +140,7 @@ extension View {
       sourceGlass: sourceGlass,
       sourceShape: sourceShape,
       popoverShape: popoverShape,
+      onDismiss: onDismiss,
       source: { self },
       content: content
     )

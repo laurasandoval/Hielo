@@ -5,6 +5,7 @@ struct StyledHieloPopover<Source: View, Content: View>: View {
   let attachmentAnchor: UnitPoint
   let sourceShape: HieloPopoverShape
   let popoverShape: HieloPopoverShape
+  let onDismiss: (() -> Void)?
   let source: Source
   let content: Content
 
@@ -17,6 +18,7 @@ struct StyledHieloPopover<Source: View, Content: View>: View {
       sourceGlass: style == .glass ? .regular.interactive() : nil,
       sourceShape: sourceShape,
       popoverShape: popoverShape,
+      onDismiss: onDismiss,
       source: { source },
       content: { content }
     )

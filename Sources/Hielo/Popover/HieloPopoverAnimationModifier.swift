@@ -25,5 +25,5 @@ extension View {
 }
 
 extension EnvironmentValues {
-    @Entry var hieloPopoverAnimation: Animation? = .spring(duration: 0.3, bounce: 0.2)
+  @Entry var hieloPopoverAnimation: Animation? = .spring(duration: 0.3, bounce: 0.2)
 }

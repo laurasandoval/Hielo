@@ -1,7 +1,11 @@
 import SwiftUI
 
+/// The Messages-style menu. Only Photos is functional in this demo; the other
+/// rows fade to a dimmed opacity to hint that Photos is the row to tap.
 struct MessagesDemoMenu: View {
-  let onSelect: () -> Void
+  let onSelectPhotos: () -> Void
+
+  @State private var dimsUnavailableRows = false
 
   private let items: [(title: String, asset: String)] = [
     ("Camera", "Camera"),
@@ -25,7 +29,15 @@ struct MessagesDemoMenu: View {
     ScrollView {
       VStack(spacing: 0) {
         ForEach(items, id: \.asset) { item in
-          Button(action: onSelect) {
+          let isAvailable = item.asset == "Photos"
+
+          Button {
+            if isAvailable {
+              onSelectPhotos()
+            } else {
+              playUnavailableHint()
+            }
+          } label: {
             HStack(spacing: 27) {
               Image(item.asset)
                 .resizable()
@@ -45,11 +57,24 @@ struct MessagesDemoMenu: View {
             .contentShape(.rect)
           }
           .buttonStyle(.plain)
+          .opacity(isAvailable || !dimsUnavailableRows ? 1 : 0.35)
+          .accessibilityHint(isAvailable ? "Shows a photo picker." : "Not available in this demo.")
         }
       }
       .padding(.vertical, 21)
     }
     .frame(width: 300, height: 450)
     .scrollIndicators(.hidden)
+  }
+
+  /// Fades the unavailable rows out, then back in.
+  private func playUnavailableHint() {
+    withAnimation(.easeInOut(duration: 0.35)) {
+      dimsUnavailableRows = true
+    } completion: {
+      withAnimation(.easeInOut(duration: 0.45)) {
+        dimsUnavailableRows = false
+      }
+    }
   }
 }

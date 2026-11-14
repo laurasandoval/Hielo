@@ -49,12 +49,8 @@ struct HieloSourceReader: UIViewRepresentable {
     }
 
     private func updateSource() {
-      guard let screen = window?.screen else { return }
-      source.update(
-        frameInScreen: convert(bounds, to: nil),
-        screen: screen,
-        owner: self
-      )
+      guard window != nil else { return }
+      source.update(frameInScreen: convert(bounds, to: nil), owner: self)
     }
   }
 }

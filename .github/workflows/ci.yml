@@ -6,12 +6,17 @@ on:
   pull_request:
 
 jobs:
-  test:
+  lint:
     runs-on: macos-26
     steps:
       - uses: actions/checkout@v5
       - name: Lint Swift
-        run: xcrun swift-format lint --recursive Sources Tests Examples
+        run: xcrun swift-format lint --strict --recursive Sources Tests Examples
+
+  test:
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v5
       - name: Select simulator
         run: |
           simulator_id="$(xcrun simctl list devices available -j | jq -r \

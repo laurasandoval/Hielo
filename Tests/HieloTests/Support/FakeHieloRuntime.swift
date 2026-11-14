@@ -6,15 +6,10 @@ import UIKit
 @MainActor
 final class FakeHieloRuntime: HieloRuntimeProviding {
   var captureResult: HieloRuntime.Capture?
-  var discoveredWindows: [UIWindow] = []
   private(set) var pausedSnapshots: [UIView] = []
 
   func capture() -> HieloRuntime.Capture? {
     captureResult
-  }
-
-  func keyboardWindows(on screen: UIScreen) -> [UIWindow] {
-    discoveredWindows.filter { $0.screen === screen }
   }
 
   func pauseSnapshot(_ snapshotView: UIView) {

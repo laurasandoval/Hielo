@@ -4,9 +4,6 @@ Each `.hieloHost()` owns an internal `@MainActor` session. The session manages
 one popover presentation at a time: `idle → overlay → idle`. Consumers use
 bindings and modifiers; the session and source resolver are implementation details.
 
-Keyboard pinning and restoration are preserved on
-`laurasandoval--keyboard-pinning`, outside the first release's API and runtime.
-
 ## Overlay presentation
 
 When a keyboard is visible, the runtime captures and pauses its snapshot. A
@@ -69,6 +66,12 @@ from a removed host from dismissing a later presentation. Normal collapse remove
 the host and restores the source in the same nonanimated transaction to avoid
 displaying two glass surfaces during handoff.
 
+A keyboard-hosted presentation also tears down when the keyboard is dismissed
+(`keyboardDidHideNotification`). The keyboard window stops rendering once its
+keyboard is gone, so a collapse animation running there may never report
+completion; without this path the source would stay hidden. `onDismiss` runs
+after teardown, once the source is restored.
+
 `hieloPopover` copies the source's SwiftUI environment into the separate
 hosting root at presentation time. This is a snapshot, not a live bridge for
 later ancestor environment changes. Bindings and observable reference models
@@ -79,6 +82,24 @@ Content-local state lasts for one presentation and resets when reopened. Put
 state that must survive dismissal in the consuming view or model. Consumer
 content must have a finite natural size; constrain flexible containers such as
 scroll views using ordinary SwiftUI layout.
+
+## Keyboard height
+
+`onHieloKeyboardHeightChange` lives in `Sources/Hielo/Keyboard` and is
+independent of the private keyboard runtime: it uses only public API and must
+not depend on `HieloRuntimeProviding` or the presentation host.
+
+The modifier adds a background `HieloKeyboardHeightReader`, whose UIKit view
+owns the measurement. Once in a window, it constrains a zero-width probe view
+to the vertical anchors of its own `keyboardLayoutGuide`, measured in window coordinates, so a change in
+the guide's height lays out the probe. In that layout pass the reader computes
+the guide's overlap with the window's bottom edge. An overlap no taller than
+the bottom safe-area inset counts as no keyboard (`current` is `0`); otherwise
+the value also becomes `lastVisible`. The result is delivered on a later
+main-actor turn, outside the layout pass, and only when it differs from the
+last delivered value. Leaving the window deactivates the constraints and cancels
+pending delivery; reentry measures again. Each modifier keeps its own
+`lastVisible`.
 
 ## Runtime boundary
 

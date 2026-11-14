@@ -10,7 +10,11 @@ struct HieloPopoverExpandedLayer<Content: View>: View {
   var body: some View {
     content
       .fixedSize()
-      .onGeometryChange(for: CGSize.self) { $0.size } action: { onSizeChange($0) }
+      .onGeometryChange(for: CGSize.self) {
+        $0.size
+      } action: {
+        onSizeChange($0)
+      }
       .frame(width: destinationSize.width, height: destinationSize.height)
       .scaleEffect(contentScale, anchor: .center)
       .opacity(opacity)

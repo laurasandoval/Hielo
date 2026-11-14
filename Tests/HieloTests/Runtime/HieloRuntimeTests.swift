@@ -6,10 +6,6 @@ import XCTest
 final class HieloRuntimeTests: XCTestCase {
   func testPrivateSymbolAssembly() {
     XCTAssertEqual(
-      HieloRuntime.remoteKeyboardWindowClassName,
-      "UIRemoteKeyboardWindow"
-    )
-    XCTAssertEqual(
       HieloRuntime.keyboardSceneDelegateSelectorName,
       "keyboardSceneDelegate"
     )
@@ -29,10 +25,5 @@ final class HieloRuntimeTests: XCTestCase {
       HieloRuntime.snapshotViewSelectorName,
       "snapshotView"
     )
-  }
-
-  func testActivationResultSuccess() {
-    XCTAssertTrue(HieloActivationResult.started.succeeded)
-    XCTAssertFalse(HieloActivationResult.sourceUnavailable.succeeded)
   }
 }

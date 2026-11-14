@@ -21,10 +21,15 @@ at your own risk. Handle missing symbols gracefully; symbol presence does not gu
 
 ## Release scope
 
-The public API on main is the Hielo popover modifier family and `.hieloHost()`.
-Session/source types are internal. Keyboard pinning, restoration, and explicit
-session control are preserved on `laurasandoval--keyboard-pinning`; do not
-reintroduce them to main without an explicit scope change.
+The public API on main is the Hielo popover modifier family, `.hieloHost()`, and
+the keyboard-height utility `onHieloKeyboardHeightChange` with
+`HieloKeyboardHeight`. Session/source types are internal. Keyboard pinning,
+restoration, and explicit session control are out of scope; do not introduce
+them to main without an explicit scope change.
+
+`HieloKeyboardHeight` reports the keyboard's full height from the window's
+bottom edge. The keyboard covers the bottom safe area, so layout measured above
+it, such as a sheet detent, subtracts the bottom safe-area inset.
 
 ## API and maintainability
 
@@ -47,13 +52,15 @@ reintroduce them to main without an explicit scope change.
 - `Sources/Hielo/Session`: public host modifier and internal session; `Internal` holds overlay mechanics
 - `Sources/Hielo/Hosting`: app- and keyboard-window presentation hosts
 - `Sources/Hielo/Popover`: public modifiers and styles; `Internal` holds UI, placement, and motion
+- `Sources/Hielo/Keyboard`: public keyboard-height utility; public API only (`keyboardLayoutGuide`) and must never depend on `Runtime` or other private UIKit
 - `Sources/Hielo/Runtime`: private UIKit discovery and capture boundary
 - `Tests/HieloTests`: tests grouped to mirror source features
 - `Examples/HieloDemo`: the iOS demonstration app
 - `Documentation`: architecture and physical-device verification
 
 Use one Swift type per file. Prefer SwiftUI in the example app; UIKit is
-expected only inside the package's keyboard-window boundary.
+expected only inside the package's keyboard-window boundary and the public
+`keyboardLayoutGuide` reader in `Sources/Hielo/Keyboard`.
 
 Keep popover placement, drag behavior, and motion tuning independent. The
 source's UIKit window resolution and SwiftUI screen measurement are both
